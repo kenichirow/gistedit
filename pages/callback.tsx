@@ -13,6 +13,9 @@ const Callback: React.FC<CallbackProps> = ({ newAccessToken }) => {
   const { accessToken, setAccessToken } = useAccessTokenState();
   const { login } = useGithubUser();
   useEffect(() => {
+    if (typeof window !== "undefined") {
+      return;
+    }
     (async () => {
       if (!accessToken) {
         setAccessToken(newAccessToken);

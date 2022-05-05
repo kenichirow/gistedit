@@ -12,6 +12,9 @@ const GistPage: React.FC<{ gist: Gist }> = ({ gist }) => {
   const router = useRouter();
   const { user } = useGithubUser();
   useEffect(() => {
+    if (typeof window !== "undefined") {
+      return;
+    }
     if (user.state == "hasValue" && !user.contents) {
       router.push("/");
     }
