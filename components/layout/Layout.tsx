@@ -1,13 +1,15 @@
-import { useEffect } from "react";
+import React from "react";
 import { useGithubUser } from "../../states/user";
 import { Header } from "../header/Header";
-export default function Layout({ children }) {
+
+const Layout: React.FC<React.PropsWithChildren<{}>> = ({ children }) => {
   const user = useGithubUser();
-  useEffect(() => {}, [user]);
   return (
     <>
       <Header {...user} />
       <main>{children}</main>
     </>
   );
-}
+};
+
+export default Layout;

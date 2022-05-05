@@ -6,7 +6,7 @@ import { useCallback } from "react";
 import { useRouter } from "next/router";
 import { useAccessTokenState } from "../../states/access_token";
 export const LoginWithGithub = () => {
-  const { login, isLoggedin } = useGithubUser();
+  const { login } = useGithubUser();
   const { accessToken } = useAccessTokenState();
   const router = useRouter();
   const loginOnclick = useCallback(async () => {
