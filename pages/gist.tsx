@@ -8,7 +8,7 @@ const Gist: NextPage = () => {
   const router = useRouter();
   const { user } = useGithubUser();
   useEffect(() => {
-    if (typeof window !== "undefined") {
+    if (typeof window === "undefined") {
       return;
     }
     if (user.state !== "hasValue") {

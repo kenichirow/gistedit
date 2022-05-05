@@ -12,14 +12,15 @@ const Callback: React.FC<CallbackProps> = ({ newAccessToken }) => {
   const router = useRouter();
   const { accessToken, setAccessToken } = useAccessTokenState();
   const { login } = useGithubUser();
+  console.log("callback");
   useEffect(() => {
-    if (typeof window !== "undefined") {
+    if (typeof window == "undefined") {
       return;
     }
+    console.log("access token");
     (async () => {
-      if (!accessToken) {
-        setAccessToken(newAccessToken);
-      }
+      console.log("has value");
+      setAccessToken(newAccessToken);
       await login().then(() => {
         router.push("/");
       });

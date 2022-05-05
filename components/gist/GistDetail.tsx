@@ -63,6 +63,9 @@ const GistDetail: React.FC = () => {
   }, [accessToken, gistRawfile, gistFile, gist]);
 
   useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
     const gists = gistsLoadable.contents as Gist[];
     if (gistsLoadable.state == "hasValue") {
       const gist = gists.find((gist) => gist.id == id);

@@ -11,10 +11,13 @@ const HomePage: NextPage = () => {
   const { accessToken } = useAccessTokenState();
 
   useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
     if (user.state == "hasValue" && user.contents) {
       setIsLoggedin(true);
     } else {
-      if (accessToken) {
+      if (accessToken.state === "hasValue" && accessToken.contents != "") {
         login();
       }
     }

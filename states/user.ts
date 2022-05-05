@@ -77,7 +77,7 @@ const useGithubUser = () => {
   const [user, setUser] = useRecoilStateLoadable(githubUserSelector);
   const resetUserState = useResetRecoilState(githubUserSelector);
   const resetAccessToken = useResetRecoilState(accessTokenState);
-  const accessToken = useRecoilValue(accessTokenState);
+  const [accessToken, _] = useRecoilStateLoadable(accessTokenState);
   const [isLoggedin, setIsLoggedIn] = useRecoilState(isLoggedinState);
 
   const resetUser = useCallback(() => {
@@ -86,10 +86,11 @@ const useGithubUser = () => {
   }, [resetUserState, resetAccessToken]);
 
   const login = useCallback(async () => {
-    if (accessToken) {
+    console.log("LOG IN");
+    if (accessToken.state == "hasValue" && accessToken.contents != "") {
       console.log(accessToken);
       console.log(isLoggedin);
-      return fetchGithubUser(accessToken)
+      return fetchGithubUser(accessToken.contents)
         .then((user: GitHubUser) => {
           console.log(`set user ${JSON.stringify(user)}`);
           setUser(user);

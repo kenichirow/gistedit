@@ -4,9 +4,10 @@ import {
   RecoilState,
   useRecoilCallback,
   DefaultValue,
+  useRecoilValueLoadable,
 } from "recoil";
 
-const accessTokenState: RecoilState<string | undefined> = selector({
+const accessTokenState: RecoilState<string> = selector({
   key: "myapp.kenichirow.com:user:access_token",
   get: async () => {
     if (typeof window !== "undefined") {
@@ -14,8 +15,9 @@ const accessTokenState: RecoilState<string | undefined> = selector({
       if (token) {
         return token;
       }
+      return "";
     }
-    return;
+    return "";
   },
   set: (_, newToken) => {
     if (typeof window !== "undefined") {
@@ -29,7 +31,7 @@ const accessTokenState: RecoilState<string | undefined> = selector({
 });
 
 const useAccessTokenState = () => {
-  const accessToken = useRecoilValue(accessTokenState);
+  const accessToken = useRecoilValueLoadable(accessTokenState);
 
   const setAccessToken = useRecoilCallback(
     ({ set }) =>

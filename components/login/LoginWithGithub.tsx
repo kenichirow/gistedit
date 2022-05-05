@@ -10,7 +10,7 @@ export const LoginWithGithub = () => {
   const { accessToken } = useAccessTokenState();
   const router = useRouter();
   const loginOnclick = useCallback(async () => {
-    if (accessToken) {
+    if (accessToken.contents != "") {
       await login().then(() => {
         router.push("/");
       });

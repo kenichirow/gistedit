@@ -22,7 +22,7 @@ const Header: React.FC<headerProps> = ({ user, resetUser }) => {
   }, [router, resetUser]);
 
   useEffect(() => {
-    if (typeof window !== "undefined") {
+    if (typeof window == "undefined") {
       return;
     }
 
