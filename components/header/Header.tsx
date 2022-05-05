@@ -22,6 +22,10 @@ const Header: React.FC<headerProps> = ({ user, resetUser }) => {
   }, [router, resetUser]);
 
   useEffect(() => {
+    if (typeof window !== "undefined") {
+      return;
+    }
+
     if (user.state == "hasValue" && user.contents) {
       console.log(user.contents);
       setIsLoggedin(true);
