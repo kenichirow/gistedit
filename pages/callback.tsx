@@ -32,9 +32,9 @@ const CallbackPage: NextPage<CallbackProps> = ({ newAccessToken }) => {
 
 export const getServerSideProps: GetServerSideProps = async ({ query }) => {
   const code = query.code;
-  const clientId = process.env.NEXT_PUBLIC_GITHUB_OAUTH_CLIENT_ID;
-  const clientSecret = process.env.NEXT_PUBLIC_GITHUB_OAUTH_CLIENT_SECRET;
-  const redirect_uri = "http://127.0.0.1:3000/callback"; //process.env.CALLBACK_URL;
+  const clientId = process.env.GITHUB_OAUTH_CLIENT_ID;
+  const clientSecret = process.env.GITHUB_OAUTH_CLIENT_SECRET;
+  const redirect_uri = process.env.CALLBACK_URL;
 
   const body = {
     code: code as string,
