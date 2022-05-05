@@ -1,0 +1,25 @@
+.sidebar {
+	border-right: 1px solid rgba(0,0,0,0.2);
+}
+
+.sidebar ul {
+	padding: 5px;
+	list-style-type: none;
+}
+
+.sidebar li {
+	padding: 10px 3px;
+	font-size: 0.8rem;
+	list-style-type: none;
+	cursor: pointer;
+}
+
+.sidebar li:hover {
+	padding: 10px 3px;
+	font-size: 0.8rem;
+	list-style-type: none;
+	cursor: pointer;
+	color: white;
+	background-color: aqua;
+	border-radius: 5px;
+}
