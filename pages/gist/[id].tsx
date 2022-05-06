@@ -18,13 +18,12 @@ const GistPage: React.FC<{ gist: Gist }> = ({ gist }) => {
     if (user.state == "hasValue" && !user.contents) {
       router.push("/");
     }
-  }, [router]);
+  }, [user, router]);
   return (
     <>
       <div className={styles.wrapper}>
         <SideBar />
         <div className={styles.content}>
-          <Link href={"/gist/new"}>{"new gist"}</Link>
           <GistDetail />
         </div>
       </div>

@@ -6,11 +6,11 @@ import styles from "../../styles/Sidebar.module.css";
 
 const SideBarItem: React.FC<{ gist: Gist }> = ({ gist }) => {
   return (
-    <li>
-      <Link href={`/gist/${gist.id}`}>
+    <Link href={`/gist/${gist.id}`}>
+      <li>
         <span>{gist.id}</span>
-      </Link>
-    </li>
+      </li>
+    </Link>
   );
 };
 

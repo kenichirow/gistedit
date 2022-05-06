@@ -16,9 +16,11 @@ type headerProps = {
 const Header: React.FC<headerProps> = ({ user, resetUser }) => {
   const router = useRouter();
   const [isLoggedin, setIsLoggedin] = useState(false);
+
   const logout = useCallback(() => {
+    console.log("reset user");
     resetUser();
-    router.push("/");
+    router.replace("/");
   }, [router, resetUser]);
 
   useEffect(() => {
@@ -26,7 +28,7 @@ const Header: React.FC<headerProps> = ({ user, resetUser }) => {
       return;
     }
 
-    if (user.state == "hasValue" && user.contents) {
+    if (user.state == "hasValue" && user.contents !== undefined) {
       console.log(user.contents);
       setIsLoggedin(true);
     }

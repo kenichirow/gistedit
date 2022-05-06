@@ -69,35 +69,31 @@ const userGistsState: RecoilState<Gist[] | GistError> = selector({
   get: async ({ get }) => {
     const githubToken = get(accessTokenState);
     const user = get(githubUserSelector);
-    console.log(user);
     const url = `https://api.github.com/users/${user.login}/gists`;
-    return fetch(url, {
-      method: "GET",
-      headers: {
-        Accept: "application/json",
-        Authorization: `token ${githubToken}`,
-      },
-    })
-      .then((res) => {
-        if (!res.ok) {
-          console.log("not");
-          return res.json();
-        }
-        console.log("gist fetched");
-        return res.json();
+    if (user) {
+      return fetch(url, {
+        method: "GET",
+        headers: {
+          Accept: "application/json",
+          Authorization: `token ${githubToken}`,
+        },
       })
-      .catch((error) => {
-        console.log("error");
-        return { message: "error" };
-      });
+        .then((res) => {
+          if (!res.ok) {
+            return res.json();
+          }
+          return res.json();
+        })
+        .catch((error) => {
+          return { message: "error" };
+        });
+    }
   },
   set: ({ set }, newValue) => {},
 });
 
 const useUsersGists = () => {
-  const repos = useRecoilValueLoadable(userGistsState);
-
-  return repos;
+  return useRecoilValueLoadable(userGistsState);
 };
 
 export { useUsersGists };

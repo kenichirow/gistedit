@@ -1,3 +1,4 @@
+import { rejects } from "assert";
 import { useCallback, useEffect } from "react";
 import {
   atom,
@@ -28,24 +29,28 @@ const githubUserAtom = atom<GitHubUser>({
 
 const githubUserSelector = selector<GitHubUser>({
   key: "myapp.kenichirow.com:user:selector",
-  get: ({ get }) => {
+  get: async ({ get }) => {
     if (typeof window !== "undefined") {
       const x = localStorage.getItem("user");
       if (x) {
         return JSON.parse(x);
+      } else {
+        return;
       }
+    } else {
+      return new Promise((resolve, reject) => {
+        reject();
+      });
     }
   },
   set: ({ set, reset }, newValue) => {
     if (typeof window !== "undefined") {
       if (newValue instanceof DefaultValue) {
-        reset(isLoggedinState);
-        //      reset(githubUserAtom);
         localStorage.removeItem("user");
+        reset(githubUserAtom);
         return;
       }
-      set(isLoggedinState, true);
-      //    set(githubUserAtom, newValue);
+      set(githubUserAtom, newValue);
       localStorage.setItem("user", JSON.stringify(newValue));
     }
   },
@@ -56,7 +61,9 @@ const isLoggedinState = atom({
   default: false,
 });
 
-const fetchGithubUser = async (accessToken: string): Promise<GitHubUser> => {
+export const fetchGithubUser = async (
+  accessToken: string
+): Promise<GitHubUser> => {
   const url = "https://api.github.com/user";
   const data = await fetch(url, {
     method: "POST",
@@ -85,27 +92,67 @@ const useGithubUser = () => {
     resetUserState();
   }, [resetUserState, resetAccessToken]);
 
-  const login = useCallback(async () => {
-    console.log("LOG IN");
-    if (accessToken.state == "hasValue" && accessToken.contents != "") {
-      console.log(accessToken);
-      console.log(isLoggedin);
-      return fetchGithubUser(accessToken.contents)
-        .then((user: GitHubUser) => {
-          console.log(`set user ${JSON.stringify(user)}`);
-          setUser(user);
-        })
-        .catch((e) => {
-          resetAccessToken();
-          resetUserState();
-        });
-    }
-    return new Promise((resolve, reject) => {
-      resolve("noop");
-    });
-  }, [isLoggedin, accessToken, setUser, resetUserState, resetAccessToken]);
+  //  const login = useCallback(async () => {
+  //    console.log("LOG IN");
+  //    if (accessToken.state == "hasValue" && accessToken.contents != "") {
+  //      console.log(accessToken);
+  //      console.log(isLoggedin);
+  //      return fetchGithubUser(accessToken.contents)
+  //        .then((user: GitHubUser) => {
+  //          console.log(`set user ${JSON.stringify(user)}`);
+  //          setUser(user);
+  //        })
+  //        .catch((e) => {
+  //          resetAccessToken();
+  //          resetUserState();
+  //        });
+  //    }
+  //    return new Promise((resolve, reject) => {
+  //      resolve("noop");
+  //    });
+  //  }, [isLoggedin, accessToken, setUser, resetUserState, resetAccessToken]);
 
-  return { user, login, resetUser };
+  useEffect(() => {
+    if (accessToken.state == "hasValue" && accessToken.contents != "") {
+      console.log(`User sttate: ${user.state}`);
+      if (user.state != "hasValue") {
+        fetchGithubUser(accessToken.contents)
+          .then((user: GitHubUser) => {
+            setUser(user);
+          })
+          .catch((e) => {
+            resetAccessToken();
+            resetUserState();
+          });
+      }
+    }
+  }, [accessToken, setUser, resetAccessToken, resetUserState]);
+
+  const login = useRecoilCallback(
+    ({ set, snapshot }) => {
+      console.log("-----------");
+      console.log("-----------");
+      return async () => {
+        if (accessToken.state == "hasValue" && accessToken.contents != "") {
+          console.log("found access token and try fetch user");
+          return fetchGithubUser(accessToken.contents)
+            .then((user: GitHubUser) => {
+              setUser(user);
+            })
+            .catch((e) => {
+              resetAccessToken();
+              resetUserState();
+            });
+        }
+        return new Promise((resolve, reject) => {
+          resolve("noop");
+        });
+      };
+    },
+    [isLoggedin, accessToken, setUser, resetUserState, resetAccessToken]
+  );
+
+  return { user, login, resetUser, setUser };
 };
 
 export { useGithubUser, githubUserSelector };

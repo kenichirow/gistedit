@@ -1,37 +1,41 @@
 import { GetServerSideProps, NextPage } from "next";
 import { useRouter } from "next/router";
 import React, { useEffect } from "react";
-import { useAccessTokenState } from "../states/access_token";
-import { useGithubUser } from "../states/user";
+import { useAccessTokenState } from "../../states/access_token";
+import { fetchGithubUser, GitHubUser, useGithubUser } from "../../states/user";
 
 type CallbackProps = {
   newAccessToken: string;
+  user: GitHubUser;
 };
 
-const Callback: React.FC<CallbackProps> = ({ newAccessToken }) => {
+const Callback: React.FC<CallbackProps> = ({ newAccessToken, user }) => {
   const router = useRouter();
   const { accessToken, setAccessToken } = useAccessTokenState();
-  const { login } = useGithubUser();
+  const { user: userState, setUser } = useGithubUser();
   console.log("callback");
   useEffect(() => {
+    setAccessToken(newAccessToken);
+    setUser(user);
+    console.log(userState);
     if (typeof window == "undefined") {
       return;
     }
-    console.log("access token");
-    (async () => {
-      console.log("has value");
-      setAccessToken(newAccessToken);
-      await login().then(() => {
-        router.push("/");
-      });
-    })();
-  }, [router, accessToken, newAccessToken, setAccessToken]);
+    if (userState.state == "hasValue" && !userState.contents) {
+      console.log(userState.contents);
+      if (router.isReady) {
+        setTimeout(() => {
+          router.replace("/");
+        }, 5000);
+      }
+    }
+  }, [router, userState, accessToken, newAccessToken, setAccessToken]);
 
   return <></>;
 };
 
-const CallbackPage: NextPage<CallbackProps> = ({ newAccessToken }) => {
-  return <Callback newAccessToken={newAccessToken} />;
+const CallbackPage: NextPage<CallbackProps> = ({ newAccessToken, user }) => {
+  return <Callback newAccessToken={newAccessToken} user={user} />;
 };
 
 export const getServerSideProps: GetServerSideProps = async ({ query }) => {
@@ -60,13 +64,15 @@ export const getServerSideProps: GetServerSideProps = async ({ query }) => {
 
   const json = await res.json();
 
+  const user = await fetchGithubUser(json.access_token);
+
   console.log("--------");
   console.log(json.access_token);
   console.log(json.scope);
   console.log(json.token_type);
   console.log("--------");
 
-  return { props: { newAccessToken: json.access_token } };
+  return { props: { newAccessToken: json.access_token, user: user } };
 };
 
 export default CallbackPage;

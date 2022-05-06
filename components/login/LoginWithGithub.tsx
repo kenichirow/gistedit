@@ -7,16 +7,10 @@ import { useRouter } from "next/router";
 import { useAccessTokenState } from "../../states/access_token";
 export const LoginWithGithub = () => {
   const { login } = useGithubUser();
-  const { accessToken } = useAccessTokenState();
   const router = useRouter();
+
   const loginOnclick = useCallback(async () => {
-    if (accessToken.contents != "") {
-      await login().then(() => {
-        router.push("/");
-      });
-    } else {
-      router.push("/login");
-    }
+    return router.replace("/auth/login");
   }, [login, router]);
 
   return (

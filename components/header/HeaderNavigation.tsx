@@ -9,11 +9,10 @@ const HeaderNavigation: React.FC<{ user: GitHubUser; isLoggedin: boolean }> = ({
 }) => {
   return (
     <div className={styles.navigation}>
-      <React.Suspense fallback={<div>loading..</div>}>
-        <Link href="/">
-          <p>{isLoggedin && user?.login}</p>
-        </Link>
-      </React.Suspense>
+      <Link href="/">
+        <p>{isLoggedin && user?.login}</p>
+      </Link>
+      {isLoggedin && <Link href={"/gist/new"}>{" + "}</Link>}
     </div>
   );
 };
