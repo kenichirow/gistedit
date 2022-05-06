@@ -4,34 +4,37 @@ import Link from "next/link";
 
 import styles from "../../styles/Sidebar.module.css";
 
-const SideBarItem: React.FC<{ gist: Gist }> = ({ gist }) => {
+const SideBarItem: React.FC<{ gistItem: Gist }> = ({ gistItem }) => {
+  const { gist } = useUsersGists();
+  const [selected, setSelect] = useState(false);
+
+  useEffect(() => {
+    if (gist.state == "hasValue") {
+      setSelect(gist.contents.id == gistItem.id);
+    }
+  }, [gist]);
   return (
-    <Link href={`/gist/${gist.id}`}>
-      <li>
-        <span>{gist.id}</span>
+    <Link href={`/gist/${gistItem.id}`}>
+      <li className={selected ? styles.gist_slected : ""}>
+        <span>{gistItem.id}</span>
       </li>
     </Link>
   );
 };
 
 const SideBar = () => {
-  const usesGistsLoadable = useUsersGists();
-  const [gists, setGists] = useState<Gist[]>([]);
-
-  useEffect(() => {
-    if (usesGistsLoadable.state == "hasValue") {
-      setGists(usesGistsLoadable.contents as Gist[]);
-    }
-  }, [usesGistsLoadable, setGists]);
-
-  return (
-    <div className={styles.sidebar}>
-      <ul>
-        {gists.map((gist) => {
-          return <SideBarItem gist={gist}></SideBarItem>;
-        })}
-      </ul>
-    </div>
-  );
+  const { gists } = useUsersGists();
+  if (gists.state == "hasValue" && gists.contents) {
+    return (
+      <div className={styles.sidebar}>
+        <ul>
+          {gists.contents.map((gist: Gist) => {
+            return <SideBarItem gistItem={gist}></SideBarItem>;
+          })}
+        </ul>
+      </div>
+    );
+  }
+  return <>loading</>;
 };
 export { SideBar };

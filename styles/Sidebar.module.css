@@ -25,5 +25,11 @@
 .sidebar li:hover {
 	color: white;
 	background-color: rgb(36, 39, 39);
-	border-radius: 5px;
+	border-radius: 2px;
+}
+
+.gist_slected{
+	color: white;
+	background-color: rgb(36, 39, 39);
+	border-radius: 2px;
 }

@@ -1,12 +1,14 @@
 import { HeaderNavigation } from "./HeaderNavigation";
-import { useGithubUser } from "../../states/user";
+import { githubUserAtom, useGithubUser } from "../../states/user";
 import React, { useCallback, useEffect, useState } from "react";
-import { Loadable, RecoilState } from "recoil";
+import { Loadable, RecoilState, useRecoilCallback } from "recoil";
 import { GitHubUser } from "../../states/user";
 import { LogoutButton } from "../LogoutButton";
 
 import styles from "../../styles/Header.module.css";
 import { useRouter } from "next/router";
+import { useUsersGists } from "../../states/gist";
+import { accessTokenQuery } from "../../states/access_token";
 
 type headerProps = {
   user: Loadable<GitHubUser>;
@@ -16,12 +18,18 @@ type headerProps = {
 const Header: React.FC<headerProps> = ({ user, resetUser }) => {
   const router = useRouter();
   const [isLoggedin, setIsLoggedin] = useState(false);
+  const { user: userState } = useGithubUser();
 
-  const logout = useCallback(() => {
-    console.log("reset user");
-    resetUser();
-    router.replace("/");
-  }, [router, resetUser]);
+  const logout = useRecoilCallback(
+    ({ snapshot, set, reset }) =>
+      async () => {
+        await reset(githubUserAtom);
+        await reset(accessTokenQuery);
+        setIsLoggedin(false);
+        await router.replace("/");
+      },
+    [router, setIsLoggedin]
+  );
 
   useEffect(() => {
     if (typeof window == "undefined") {
@@ -29,17 +37,20 @@ const Header: React.FC<headerProps> = ({ user, resetUser }) => {
     }
 
     if (user.state == "hasValue" && user.contents !== undefined) {
-      console.log(user.contents);
       setIsLoggedin(true);
     }
   }, [user, setIsLoggedin]);
 
-  return (
-    <div className={styles.header}>
-      <HeaderNavigation user={user.contents} isLoggedin={isLoggedin} />
-      {isLoggedin && <LogoutButton logoutCallback={logout} />}
-    </div>
-  );
+  if (user.state === "hasValue" && user.contents) {
+    return (
+      <div className={styles.header}>
+        <HeaderNavigation user={user.contents} isLoggedin={true} />
+        <LogoutButton logoutCallback={logout} />
+      </div>
+    );
+  } else {
+    <div className={styles.header}></div>;
+  }
 };
 
 export { Header };

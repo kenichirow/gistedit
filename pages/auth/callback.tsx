@@ -21,13 +21,9 @@ const Callback: React.FC<CallbackProps> = ({ newAccessToken, user }) => {
     if (typeof window == "undefined") {
       return;
     }
-    if (userState.state == "hasValue" && !userState.contents) {
+    if (userState.state == "hasValue" && userState.contents) {
       console.log(userState.contents);
-      if (router.isReady) {
-        setTimeout(() => {
-          router.replace("/");
-        }, 5000);
-      }
+      router.replace("/");
     }
   }, [router, userState, accessToken, newAccessToken, setAccessToken]);
 

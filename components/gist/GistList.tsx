@@ -1,20 +1,22 @@
-import { useEffect, useState } from "react";
 import { GistCard } from "./GistCard";
-import { useUsersGists, Gist } from "../../states/gist";
+import { useUsersGists } from "../../states/gist";
+import { DefaultValue } from "recoil";
 
 const GistList = () => {
-  const gists = useUsersGists();
-  if (gists.state != "hasValue") {
-    return <div>loading...</div>;
+  const { gists } = useUsersGists();
+  console.log(gists.state);
+  if (gists.state === "hasValue" && gists.contents) {
+    console.log("here...");
+    console.log(gists.contents);
+    return (
+      <ul>
+        {gists.contents.map((gist) => {
+          return <GistCard gist={gist} />;
+        })}
+      </ul>
+    );
   }
-  const contents: Gist[] = gists.contents as Gist[];
-  return (
-    <ul>
-      {contents.map((gist) => {
-        return <GistCard gist={gist} />;
-      })}
-    </ul>
-  );
+  return <div>...</div>;
 };
 
 export { GistList };

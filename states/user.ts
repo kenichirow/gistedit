@@ -14,7 +14,7 @@ import {
   useRecoilCallback,
 } from "recoil";
 
-import { accessTokenState } from "./access_token";
+import { accessTokenQuery } from "./access_token";
 
 export type GitHubUser = {
   error?: boolean;
@@ -22,26 +22,34 @@ export type GitHubUser = {
   login?: string;
 };
 
-const githubUserAtom = atom<GitHubUser>({
+export const githubUserAtom = atom<GitHubUser>({
   key: "myapp.kenichirow.com:user:atom",
-  default: { error: true, reason: "not logged in" },
 });
 
 const githubUserSelector = selector<GitHubUser>({
   key: "myapp.kenichirow.com:user:selector",
   get: async ({ get }) => {
     if (typeof window !== "undefined") {
+      const a = get(githubUserAtom);
+      console.log("........user 1");
+      if (a) {
+        if (a.login) {
+          return a;
+        }
+      }
       const x = localStorage.getItem("user");
+      console.log("........user 2");
       if (x) {
         return JSON.parse(x);
       } else {
-        return;
+        return new Promise((_, reject) => {
+          reject();
+        });
       }
-    } else {
-      return new Promise((resolve, reject) => {
-        reject();
-      });
     }
+    return new Promise((_, reject) => {
+      reject();
+    });
   },
   set: ({ set, reset }, newValue) => {
     if (typeof window !== "undefined") {
@@ -83,34 +91,14 @@ export const fetchGithubUser = async (
 const useGithubUser = () => {
   const [user, setUser] = useRecoilStateLoadable(githubUserSelector);
   const resetUserState = useResetRecoilState(githubUserSelector);
-  const resetAccessToken = useResetRecoilState(accessTokenState);
-  const [accessToken, _] = useRecoilStateLoadable(accessTokenState);
+  const resetAccessToken = useResetRecoilState(accessTokenQuery);
+  const [accessToken, _] = useRecoilStateLoadable(accessTokenQuery);
   const [isLoggedin, setIsLoggedIn] = useRecoilState(isLoggedinState);
 
   const resetUser = useCallback(() => {
     resetAccessToken();
     resetUserState();
   }, [resetUserState, resetAccessToken]);
-
-  //  const login = useCallback(async () => {
-  //    console.log("LOG IN");
-  //    if (accessToken.state == "hasValue" && accessToken.contents != "") {
-  //      console.log(accessToken);
-  //      console.log(isLoggedin);
-  //      return fetchGithubUser(accessToken.contents)
-  //        .then((user: GitHubUser) => {
-  //          console.log(`set user ${JSON.stringify(user)}`);
-  //          setUser(user);
-  //        })
-  //        .catch((e) => {
-  //          resetAccessToken();
-  //          resetUserState();
-  //        });
-  //    }
-  //    return new Promise((resolve, reject) => {
-  //      resolve("noop");
-  //    });
-  //  }, [isLoggedin, accessToken, setUser, resetUserState, resetAccessToken]);
 
   useEffect(() => {
     if (accessToken.state == "hasValue" && accessToken.contents != "") {
@@ -130,8 +118,6 @@ const useGithubUser = () => {
 
   const login = useRecoilCallback(
     ({ set, snapshot }) => {
-      console.log("-----------");
-      console.log("-----------");
       return async () => {
         if (accessToken.state == "hasValue" && accessToken.contents != "") {
           console.log("found access token and try fetch user");
