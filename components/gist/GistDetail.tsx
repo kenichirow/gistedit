@@ -7,7 +7,7 @@ import { GistControl } from "./GistControl";
 
 const GistFile: React.FC<{ file: GistFile }> = ({ file }) => {
   return (
-    <div>
+    <div key={file.filename}>
       <h2>{file.filename}</h2>
       <p>
         {file.size}

@@ -83,7 +83,9 @@ export const fetchGithubUser = async (
     if (!res.ok) {
       throw new Error(res.statusText);
     }
-    return res.json();
+    const x = res.json();
+    console.log(x);
+    return x;
   });
   return data;
 };

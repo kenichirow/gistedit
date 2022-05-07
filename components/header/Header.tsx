@@ -44,7 +44,7 @@ const Header: React.FC<headerProps> = ({ user, resetUser }) => {
   if (user.state === "hasValue" && user.contents) {
     return (
       <div className={styles.header}>
-        <HeaderNavigation user={user.contents} isLoggedin={true} />
+        <HeaderNavigation />
         <LogoutButton logoutCallback={logout} />
       </div>
     );
