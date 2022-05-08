@@ -12,8 +12,8 @@ const Header: React.FC = () => {
   const { user, logout } = useGithubUser();
 
   const onLogoutClick = useCallback(() => {
-    logout(() => {
-      router.replace("/");
+    logout(async () => {
+      await router.replace("/");
     });
   }, [logout]);
 

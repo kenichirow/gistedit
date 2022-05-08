@@ -14,9 +14,9 @@ export const LoginWithGithub = () => {
     <div className={styles.wrapper}>
       <div className={styles.githubButton}>
         <GitHubIcon />
-        <button onClick={loginOnclick}>
+        <div onClick={loginOnclick}>
           <span>Sign In With Github</span>
-        </button>
+        </div>
       </div>
     </div>
   );

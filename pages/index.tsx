@@ -21,6 +21,7 @@ const HomePage: NextPage = () => {
       if (user.state == "hasValue" && user.contents) {
         setIsLoggedin(true);
       } else {
+        setIsLoggedin(false);
         await login();
       }
     })();

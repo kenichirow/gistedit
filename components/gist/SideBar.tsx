@@ -13,6 +13,7 @@ const SideBarItem: React.FC<{ gistItem: Gist }> = ({ gistItem }) => {
       setSelect(gist.contents.id == gistItem.id);
     }
   }, [gist]);
+
   const filename = Object.keys(gistItem.files)[0];
 
   return (

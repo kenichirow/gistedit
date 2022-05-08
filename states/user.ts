@@ -84,7 +84,7 @@ const useGithubUser = () => {
       async (callback: () => void) => {
         await reset(accessTokenQuery);
         await reset(githubUserQuery);
-        callback();
+        await callback();
       }
   );
 
