@@ -1,30 +1,34 @@
 import { SideBar } from "../../components/gist/SideBar";
 import { GistDetail } from "../../components/gist/GistDetail";
 
-import { Gist } from "../../states/gist";
+import { useUsersGists } from "../../states/gist";
 import styles from "../../styles/Content.module.css";
-import Link from "next/link";
 import { useRouter } from "next/router";
 import { useGithubUser } from "../../states/user";
 import { useEffect } from "react";
 
-const GistPage: React.FC<{ gist: Gist }> = ({ gist }) => {
+const GistPage: React.FC = () => {
   const router = useRouter();
-  const { user } = useGithubUser();
+  const gistId = router.query.id as string;
+
+  const { login, user } = useGithubUser();
+  const { setGist } = useUsersGists();
+
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      return;
-    }
-    if (user.state == "hasValue" && !user.contents) {
-      router.push("/");
-    }
-  }, [router]);
+    (async () => {
+      if (user.state !== "hasValue") {
+        await login();
+      }
+    })();
+
+    setGist(gistId);
+  }, [user, login, gistId, router]);
+
   return (
     <>
       <div className={styles.wrapper}>
         <SideBar />
         <div className={styles.content}>
-          <Link href={"/gist/new"}>{"new gist"}</Link>
           <GistDetail />
         </div>
       </div>

@@ -1,43 +1,43 @@
 import { HeaderNavigation } from "./HeaderNavigation";
 import { useGithubUser } from "../../states/user";
-import React, { useCallback, useEffect, useState } from "react";
-import { Loadable, RecoilState } from "recoil";
-import { GitHubUser } from "../../states/user";
+import React, { useCallback, useState } from "react";
 import { LogoutButton } from "../LogoutButton";
 
 import styles from "../../styles/Header.module.css";
 import { useRouter } from "next/router";
 
-type headerProps = {
-  user: Loadable<GitHubUser>;
-  resetUser: () => void;
-};
-
-const Header: React.FC<headerProps> = ({ user, resetUser }) => {
+const Header: React.FC = () => {
   const router = useRouter();
-  const [isLoggedin, setIsLoggedin] = useState(false);
-  const logout = useCallback(() => {
-    resetUser();
-    router.push("/");
-  }, [router, resetUser]);
+  const [showPulldown, setShwoPulldown] = useState(false);
+  const { user, logout } = useGithubUser();
 
-  useEffect(() => {
-    if (typeof window == "undefined") {
-      return;
-    }
+  const onLogoutClick = useCallback(() => {
+    logout(async () => {
+      await router.replace("/");
+    });
+  }, [logout]);
 
-    if (user.state == "hasValue" && user.contents) {
-      console.log(user.contents);
-      setIsLoggedin(true);
-    }
-  }, [user, setIsLoggedin]);
+  const show = useCallback(() => {
+    setShwoPulldown(true);
+  }, []);
 
-  return (
-    <div className={styles.header}>
-      <HeaderNavigation user={user.contents} isLoggedin={isLoggedin} />
-      {isLoggedin && <LogoutButton logoutCallback={logout} />}
-    </div>
-  );
+  if (user.state === "hasValue") {
+    return (
+      <div className={styles.header}>
+        <HeaderNavigation />
+        <div className={styles.avatarWrapper}>
+          <div className={styles.avatarImage}>
+            <img src={user.contents.avatar_url} alt="" width={23} height={23} />
+          </div>
+          <div className={styles.avatar}>{user.contents.name}</div>
+          <div onClick={show}>{" ↓ "}</div>
+          <LogoutButton show={showPulldown} logoutCallback={onLogoutClick} />
+        </div>
+      </div>
+    );
+  } else {
+    return <div className={styles.header}></div>;
+  }
 };
 
 export { Header };

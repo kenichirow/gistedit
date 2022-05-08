@@ -1,62 +1,57 @@
-import { useCallback, useEffect } from "react";
 import {
   atom,
   selector,
-  useRecoilState,
-  useRecoilValue,
-  RecoilState,
-  useResetRecoilState,
-  useRecoilValueLoadable,
-  selectorFamily,
   DefaultValue,
   useRecoilStateLoadable,
   useRecoilCallback,
 } from "recoil";
 
-import { accessTokenState } from "./access_token";
+import { accessTokenQuery } from "./access_token";
 
 export type GitHubUser = {
-  error?: boolean;
-  reason?: string;
   login?: string;
+  avatar_url?: string;
+  name?: string;
 };
 
-const githubUserAtom = atom<GitHubUser>({
+export const githubUserState = atom<GitHubUser>({
   key: "myapp.kenichirow.com:user:atom",
-  default: { error: true, reason: "not logged in" },
 });
 
-const githubUserSelector = selector<GitHubUser>({
+const githubUserQuery = selector<GitHubUser>({
   key: "myapp.kenichirow.com:user:selector",
-  get: ({ get }) => {
+  get: async ({ get }) => {
+    const a = get(githubUserState);
+    if (a) {
+      return a;
+    }
+
     if (typeof window !== "undefined") {
       const x = localStorage.getItem("user");
       if (x) {
         return JSON.parse(x);
+      } else {
+        return Promise.resolve();
       }
     }
+    return Promise.resolve();
   },
   set: ({ set, reset }, newValue) => {
     if (typeof window !== "undefined") {
       if (newValue instanceof DefaultValue) {
-        reset(isLoggedinState);
-        //      reset(githubUserAtom);
         localStorage.removeItem("user");
+        reset(githubUserState);
         return;
       }
-      set(isLoggedinState, true);
-      //    set(githubUserAtom, newValue);
+      set(githubUserState, newValue);
       localStorage.setItem("user", JSON.stringify(newValue));
     }
   },
 });
 
-const isLoggedinState = atom({
-  key: "myapp.kenichirow.com:user:loggedin",
-  default: false,
-});
-
-const fetchGithubUser = async (accessToken: string): Promise<GitHubUser> => {
+export const fetchGithubUser = async (
+  accessToken: string
+): Promise<GitHubUser> => {
   const url = "https://api.github.com/user";
   const data = await fetch(url, {
     method: "POST",
@@ -74,38 +69,37 @@ const fetchGithubUser = async (accessToken: string): Promise<GitHubUser> => {
 };
 
 const useGithubUser = () => {
-  const [user, setUser] = useRecoilStateLoadable(githubUserSelector);
-  const resetUserState = useResetRecoilState(githubUserSelector);
-  const resetAccessToken = useResetRecoilState(accessTokenState);
-  const [accessToken, _] = useRecoilStateLoadable(accessTokenState);
-  const [isLoggedin, setIsLoggedIn] = useRecoilState(isLoggedinState);
+  const [user, setUser] = useRecoilStateLoadable(githubUserQuery);
 
-  const resetUser = useCallback(() => {
-    resetAccessToken();
-    resetUserState();
-  }, [resetUserState, resetAccessToken]);
+  const logout = useRecoilCallback(
+    ({ reset }) =>
+      async (callback: () => void) => {
+        await reset(accessTokenQuery);
+        await reset(githubUserQuery);
+        await callback();
+      }
+  );
 
-  const login = useCallback(async () => {
-    console.log("LOG IN");
-    if (accessToken.state == "hasValue" && accessToken.contents != "") {
-      console.log(accessToken);
-      console.log(isLoggedin);
-      return fetchGithubUser(accessToken.contents)
-        .then((user: GitHubUser) => {
-          console.log(`set user ${JSON.stringify(user)}`);
-          setUser(user);
-        })
-        .catch((e) => {
-          resetAccessToken();
-          resetUserState();
-        });
-    }
-    return new Promise((resolve, reject) => {
-      resolve("noop");
-    });
-  }, [isLoggedin, accessToken, setUser, resetUserState, resetAccessToken]);
+  const login = useRecoilCallback(({ set, snapshot, reset }) => {
+    return async () => {
+      return snapshot.getPromise(accessTokenQuery).then((token) => {
+        if (token != "") {
+          return fetchGithubUser(token)
+            .then((user: GitHubUser) => {
+              set(githubUserQuery, user);
+            })
+            .catch((e) => {
+              reset(accessTokenQuery);
+              reset(githubUserState);
+              return Promise.resolve();
+            });
+        }
+        return Promise.resolve();
+      });
+    };
+  });
 
-  return { user, login, resetUser };
+  return { user, login, logout, setUser };
 };
 
-export { useGithubUser, githubUserSelector };
+export { useGithubUser, githubUserQuery };

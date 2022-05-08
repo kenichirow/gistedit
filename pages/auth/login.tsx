@@ -8,7 +8,7 @@ export const getServerSideProps: GetServerSideProps = async () => {
   const clientId = process.env.GITHUB_OAUTH_CLIENT_ID;
   const body = {
     client_id: clientId as string,
-    scope: "repo,user,gist",
+    scope: "user,gist",
   };
 
   const queryParams = new URLSearchParams(body);
