@@ -2,12 +2,8 @@ import {
   atom,
   selector,
   selectorFamily,
-  atomFamily,
-  DefaultValue,
   useRecoilCallback,
-  useRecoilValue,
   useRecoilValueLoadable,
-  useSetRecoilState,
 } from "recoil";
 
 import { accessTokenQuery } from "./access_token";
@@ -15,11 +11,11 @@ import { githubUserQuery } from "./user";
 
 export type GistFile = {
   filename: string;
-  type: string;
-  language: string;
-  raw_url: string;
+  type?: string;
+  language?: string;
+  raw_url?: string;
   raw?: string;
-  size: number;
+  size?: number;
 };
 
 export type RawGistFile = string;
@@ -65,6 +61,10 @@ export const userGistsQuery = selector<Array<Gist>>({
   },
 });
 
+const currentGistIdState = atom<string>({
+  key: "myapp.kenichirow.com:gist:current:id",
+});
+
 const currentGistState = atom<Gist>({
   key: "myapp.kenichirow.com:gist:current",
 });
@@ -79,14 +79,14 @@ const currentGistQuery = selector({
 const currentGistFilesQuery = selector({
   key: "myapp.kenichirow.com:gist:current:files:query",
   get: async ({ get }) => {
-    const gist = get(currentGistState);
+    const gist = get(currentGistQuery);
     if (!gist) {
       return;
     }
     const files = Object.entries(gist.files).map(
       async (value: [string, GistFile]) => {
         let file = value[1] as GistFile;
-        const raw = await get(rawGisteFile(file.raw_url));
+        const raw = await get(rawGisteFile(file.raw_url as string));
         return { ...file, raw: raw };
       }
     );
@@ -110,33 +110,82 @@ const rawGisteFile = selectorFamily<RawGistFile, RawGistFileURL>({
     },
 });
 
+type patchGistBody = {
+  files: { [filename: string]: { content: string } };
+};
+const toPatchGistBody = (gistFiles: GistFile[]): patchGistBody => {
+  let body: patchGistBody = { files: {} };
+
+  gistFiles.forEach((f: GistFile) => {
+    if (f.raw != "") {
+      body.files[f.filename] = { content: f.raw || "" };
+    }
+  });
+  return body;
+};
+
 const useUsersGists = () => {
   const gists = useRecoilValueLoadable(userGistsQuery);
   const gist = useRecoilValueLoadable(currentGistQuery);
   const gistFiles = useRecoilValueLoadable(currentGistFilesQuery);
+
+  const updateGist = useRecoilCallback(
+    ({ snapshot, refresh }) =>
+      async (updateFiles: GistFile[]) => {
+        const url = `https://api.github.com/gists/${gist.contents.id}`;
+        const githubToken = await snapshot
+          .getLoadable(accessTokenQuery)
+          .getValue();
+
+        if (githubToken === "") {
+          return Promise.reject();
+        }
+        const headers = {
+          "Content-type": "application/json",
+          Authorization: `token ${githubToken}`,
+          Accept: "application/vnd.github.v3+json",
+        };
+
+        const current: Gist = await snapshot
+          .getPromise(currentGistQuery)
+          .then((gist) => {
+            return gist;
+          });
+
+        if (!current) {
+          return Promise.reject();
+        }
+
+        const body = toPatchGistBody(updateFiles);
+
+        await fetch(url, {
+          method: "PATCH",
+          headers: headers,
+          body: JSON.stringify(body),
+        }).then(async (res) => {
+          if (!res.ok) {
+            console.log(res.text());
+            return;
+          }
+        });
+      }
+  );
+
   const setGist = useRecoilCallback(
     ({ snapshot, set }) =>
       async (gistId: string) => {
-        const current: Gist | undefined = await snapshot
-          .getPromise(userGistsQuery)
-          .then((gists) => {
-            const current = gists.find((g) => g.id == gistId);
-            if (current) {
-              return current;
-            } else {
-              return;
-            }
-          });
-
-        if (current) {
-          set(currentGistState, current);
-        }
+        snapshot.getPromise(userGistsQuery).then((gists) => {
+          const current = gists.find((g) => g.id == gistId);
+          if (current) {
+            set(currentGistState, current);
+          }
+        });
       }
   );
   const resetGist = useRecoilCallback(({ reset }) => async () => {
     await reset(currentGistState);
   });
-  return { gists, setGist, gist, gistFiles, resetGist };
+  return { gists, setGist, gist, gistFiles, resetGist, updateGist };
 };
 
 export { useUsersGists };

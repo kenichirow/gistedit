@@ -1,64 +1,58 @@
-import React, { useCallback, useState } from "react";
-import { useAccessTokenState } from "../../states/access_token";
+import React, { useCallback, useEffect, useState } from "react";
 import { useUsersGists, GistFile } from "../../states/gist";
 import styles from "../../styles/GistDetail.module.css";
 import { GistControl } from "./GistControl";
-
-const GistFile: React.FC<{ file: GistFile }> = ({ file }) => {
-  return (
-    <div key={file.filename}>
-      <h2>{file.filename}</h2>
-      <p>
-        {file.size}
-        {"b"}
-      </p>
-      <p>{file.language}</p>
-      <textarea className={styles.gistCode} value={file.raw} />
-    </div>
-  );
-};
+import { GistFileContent } from "./GistFile";
 
 const GistDetail: React.FC = () => {
-  const { gist, gistFiles } = useUsersGists();
-  const [gistRawfile, setGistRawfile] = useState<string>("loading..");
+  const { gist, gistFiles, updateGist } = useUsersGists();
+  const [localGistFiles, setLocalGistFiles] = useState<GistFile[]>([]);
 
-  const onGistChange = useCallback(
-    (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-      setGistRawfile(e.target.value);
+  useEffect(() => {
+    if (gistFiles.state === "hasValue" && gistFiles.contents) {
+      setLocalGistFiles(gistFiles.contents);
+    }
+  }, [gistFiles]);
+
+  const onGistFileChange = useCallback(
+    (filename: string, content: string) => {
+      const newFiles = localGistFiles.map((f) => {
+        if (f.filename == filename) {
+          return { ...f, raw: content };
+        }
+        return f;
+      });
+      setLocalGistFiles(newFiles);
     },
-    []
+    [localGistFiles]
   );
 
-  const { accessToken } = useAccessTokenState();
+  const onNewGistFile = useCallback(
+    (filename: string) => {
+      const newGistFile = {
+        filename: filename,
+        content: "",
+        raw: "",
+      };
+
+      setLocalGistFiles(localGistFiles.concat([newGistFile]).reverse());
+    },
+    [localGistFiles]
+  );
 
   const onGistUpdate = useCallback(() => {
-    // const url = `https://api.github.com/gists/${gist.contents.id}`;
-    // const headers = {
-    //   "Content-type": "application/json",
-    //   Authorization: `token ${accessToken}`,
-    //   Accept: "application/vnd.github.v3+json",
-    // };
-    // const body = {
-    //   files: { [gistFile?.filename as string]: { content: gistRawfile } },
-    // };
-    // (async () => {
-    //   fetch(url, {
-    //     method: "PATCH",
-    //     headers: headers,
-    //     body: JSON.stringify(body),
-    //   }).then((res) => {
-    //     console.log(res.json());
-    //   });
-    // })();
-  }, [accessToken, gistRawfile, gist]);
+    updateGist(localGistFiles);
+  }, [localGistFiles]);
 
   if (gist.state == "hasValue" && gistFiles.state == "hasValue") {
     return (
       <article className={styles.gistDetail}>
-        {gistFiles.contents &&
-          gistFiles.contents.map((gistFile) => {
-            return <GistFile file={gistFile} />;
-          })}
+        <GistControl onUpdate={onGistUpdate} onNewGistFile={onNewGistFile} />
+        {localGistFiles.map((gistFile) => {
+          return (
+            <GistFileContent file={gistFile} onChange={onGistFileChange} />
+          );
+        })}
       </article>
     );
   } else {

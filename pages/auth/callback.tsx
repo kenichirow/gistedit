@@ -35,17 +35,20 @@ const CallbackPage: NextPage<CallbackProps> = ({ newAccessToken, user }) => {
   return <Callback newAccessToken={newAccessToken} user={user} />;
 };
 
-export const getServerSideProps: GetServerSideProps = async ({ query }) => {
+export const getServerSideProps: GetServerSideProps = async ({
+  query,
+  req,
+}) => {
   const code = query.code;
   const clientId = process.env.GITHUB_OAUTH_CLIENT_ID;
   const clientSecret = process.env.GITHUB_OAUTH_CLIENT_SECRET;
-  const redirect_uri = process.env.CALLBACK_URL;
+  const redirectUri = process.env.CALLBACK_URL;
 
   const body = {
     code: code as string,
     client_id: clientId as string,
     client_secret: clientSecret as string,
-    redirect_uri: redirect_uri as string,
+    redirect_uri: redirectUri as string,
   };
 
   const queryParams = new URLSearchParams(body);
