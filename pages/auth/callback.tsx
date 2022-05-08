@@ -48,8 +48,8 @@ export const getServerSideProps: GetServerSideProps = async ({ query }) => {
     redirect_uri: redirect_uri as string,
   };
 
-  const query_params = new URLSearchParams(body);
-  const url = `https://github.com/login/oauth/access_token?` + query_params;
+  const queryParams = new URLSearchParams(body);
+  const url = `https://github.com/login/oauth/access_token?` + queryParams;
 
   const res = await fetch(url, {
     method: "POST",
@@ -60,6 +60,7 @@ export const getServerSideProps: GetServerSideProps = async ({ query }) => {
   });
 
   const json = await res.json();
+  console.log(json);
 
   const user = await fetchGithubUser(json.access_token);
 
