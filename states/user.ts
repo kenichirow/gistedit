@@ -39,14 +39,10 @@ const githubUserQuery = selector<GitHubUser>({
       if (x) {
         return JSON.parse(x);
       } else {
-        return new Promise((_, reject) => {
-          reject();
-        });
+        return Promise.resolve();
       }
     }
-    return new Promise((_, reject) => {
-      reject();
-    });
+    return Promise.resolve();
   },
   set: ({ set, reset }, newValue) => {
     if (typeof window !== "undefined") {
@@ -59,11 +55,6 @@ const githubUserQuery = selector<GitHubUser>({
       localStorage.setItem("user", JSON.stringify(newValue));
     }
   },
-});
-
-const isLoggedinState = atom({
-  key: "myapp.kenichirow.com:user:loggedin",
-  default: false,
 });
 
 export const fetchGithubUser = async (
@@ -87,10 +78,9 @@ export const fetchGithubUser = async (
 
 const useGithubUser = () => {
   const [user, setUser] = useRecoilStateLoadable(githubUserQuery);
+  const accessToken = useRecoilValueLoadable(accessTokenQuery);
   const resetUserState = useResetRecoilState(githubUserQuery);
   const resetAccessToken = useResetRecoilState(accessTokenQuery);
-  const [accessToken, _] = useRecoilStateLoadable(accessTokenQuery);
-  const [isLoggedin, setIsLoggedIn] = useRecoilState(isLoggedinState);
 
   const resetUser = useCallback(() => {
     resetAccessToken();
@@ -119,7 +109,7 @@ const useGithubUser = () => {
         return Promise.resolve();
       };
     },
-    [isLoggedin, accessToken, accessTokenQuery, githubUserState]
+    [accessToken, accessTokenQuery, githubUserState]
   );
 
   return { user, login, resetUser, setUser };

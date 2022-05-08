@@ -1,5 +1,5 @@
 import { HeaderNavigation } from "./HeaderNavigation";
-import { githubUserAtom, useGithubUser } from "../../states/user";
+import { githubUserState, useGithubUser } from "../../states/user";
 import React, { useCallback, useEffect, useState } from "react";
 import { Loadable, RecoilState, useRecoilCallback } from "recoil";
 import { LogoutButton } from "../LogoutButton";
@@ -10,36 +10,24 @@ import { accessTokenQuery } from "../../states/access_token";
 
 const Header: React.FC = () => {
   const router = useRouter();
-  const [isLoggedin, setIsLoggedin] = useState(false);
   const [showPulldown, setShwoPulldown] = useState(false);
   const { user } = useGithubUser();
 
   const logout = useRecoilCallback(
     ({ snapshot, set, reset }) =>
       async () => {
-        await reset(githubUserAtom);
+        await reset(githubUserState);
         await reset(accessTokenQuery);
-        setIsLoggedin(false);
         await router.replace("/");
       },
-    [router, setIsLoggedin]
+    [router]
   );
 
   const show = useCallback(() => {
     setShwoPulldown(true);
   }, []);
 
-  useEffect(() => {
-    if (typeof window == "undefined") {
-      return;
-    }
-
-    if (user.state == "hasValue" && user.contents !== undefined) {
-      setIsLoggedin(true);
-    }
-  }, [user, setIsLoggedin]);
-
-  if (user.state === "hasValue" && user.contents) {
+  if (user.state === "hasValue") {
     return (
       <div className={styles.header}>
         <HeaderNavigation />

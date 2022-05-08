@@ -16,7 +16,7 @@ const GistPage: React.FC = () => {
 
   useEffect(() => {
     (async () => {
-      if (user.state != "hasValue") {
+      if (user.state !== "hasValue") {
         await login();
       }
     })();
