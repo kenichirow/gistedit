@@ -1,27 +1,21 @@
 import { HeaderNavigation } from "./HeaderNavigation";
-import { githubUserState, useGithubUser } from "../../states/user";
-import React, { useCallback, useEffect, useState } from "react";
-import { Loadable, RecoilState, useRecoilCallback } from "recoil";
+import { useGithubUser } from "../../states/user";
+import React, { useCallback, useState } from "react";
 import { LogoutButton } from "../LogoutButton";
 
 import styles from "../../styles/Header.module.css";
 import { useRouter } from "next/router";
-import { accessTokenQuery } from "../../states/access_token";
 
 const Header: React.FC = () => {
   const router = useRouter();
   const [showPulldown, setShwoPulldown] = useState(false);
-  const { user } = useGithubUser();
+  const { user, logout } = useGithubUser();
 
-  const logout = useRecoilCallback(
-    ({ snapshot, set, reset }) =>
-      async () => {
-        await reset(githubUserState);
-        await reset(accessTokenQuery);
-        await router.replace("/");
-      },
-    [router]
-  );
+  const onLogoutClick = useCallback(() => {
+    logout(() => {
+      router.replace("/");
+    });
+  }, [logout]);
 
   const show = useCallback(() => {
     setShwoPulldown(true);
@@ -37,7 +31,7 @@ const Header: React.FC = () => {
           </div>
           <div className={styles.avatar}>{user.contents.name}</div>
           <div onClick={show}>{" ↓ "}</div>
-          <LogoutButton show={showPulldown} logoutCallback={logout} />
+          <LogoutButton show={showPulldown} logoutCallback={onLogoutClick} />
         </div>
       </div>
     );

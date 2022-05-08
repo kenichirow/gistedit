@@ -78,25 +78,21 @@ export const fetchGithubUser = async (
 
 const useGithubUser = () => {
   const [user, setUser] = useRecoilStateLoadable(githubUserQuery);
-  const accessToken = useRecoilValueLoadable(accessTokenQuery);
-  const resetUserState = useResetRecoilState(githubUserQuery);
-  const resetAccessToken = useResetRecoilState(accessTokenQuery);
 
-  const resetUser = useCallback(() => {
-    resetAccessToken();
-    resetUserState();
-  }, [resetUserState, resetAccessToken]);
+  const logout = useRecoilCallback(
+    ({ reset }) =>
+      async (callback: () => void) => {
+        await reset(accessTokenQuery);
+        await reset(githubUserQuery);
+        callback();
+      }
+  );
 
-  //  const resetUser = useRecoilCallback(({ reset }) => async () => {
-  //    reset(accessTokenQuery);
-  //    reset(githubUserQuery);
-  //  });
-
-  const login = useRecoilCallback(
-    ({ set, snapshot, reset }) => {
-      return async () => {
-        if (accessToken.state == "hasValue" && accessToken.contents != "") {
-          return fetchGithubUser(accessToken.contents)
+  const login = useRecoilCallback(({ set, snapshot, reset }) => {
+    return async () => {
+      return snapshot.getPromise(accessTokenQuery).then((token) => {
+        if (token != "") {
+          return fetchGithubUser(token)
             .then((user: GitHubUser) => {
               set(githubUserQuery, user);
             })
@@ -107,12 +103,11 @@ const useGithubUser = () => {
             });
         }
         return Promise.resolve();
-      };
-    },
-    [accessToken, accessTokenQuery, githubUserState]
-  );
+      });
+    };
+  });
 
-  return { user, login, resetUser, setUser };
+  return { user, login, logout, setUser };
 };
 
 export { useGithubUser, githubUserQuery };

@@ -39,6 +39,9 @@ export const userGistsQuery = selector<Array<Gist>>({
   key: "myapp.kenichirow.com:gist:gists",
   get: async ({ get }) => {
     const githubToken = await get(accessTokenQuery);
+    if (githubToken == "") {
+      return Promise.reject();
+    }
     const user = await get(githubUserQuery);
     const url = `https://api.github.com/users/${user.login}/gists`;
 
