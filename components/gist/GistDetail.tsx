@@ -1,5 +1,4 @@
-import { json } from "node:stream/consumers";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useState } from "react";
 import { useAccessTokenState } from "../../states/access_token";
 import { useUsersGists, GistFile } from "../../states/gist";
 import styles from "../../styles/GistDetail.module.css";
@@ -63,7 +62,7 @@ const GistDetail: React.FC = () => {
       </article>
     );
   } else {
-    return <div>loading..</div>;
+    return <div></div>;
   }
 };
 

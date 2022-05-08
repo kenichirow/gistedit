@@ -11,7 +11,7 @@ import {
 } from "recoil";
 
 import { accessTokenQuery } from "./access_token";
-import { githubUserSelector } from "./user";
+import { githubUserQuery } from "./user";
 
 export type GistFile = {
   filename: string;
@@ -38,12 +38,8 @@ export type Gist = {
 export const userGistsQuery = selector<Array<Gist>>({
   key: "myapp.kenichirow.com:gist:gists",
   get: async ({ get }) => {
-    console.log("get user gists");
     const githubToken = await get(accessTokenQuery);
-    console.log(githubToken);
-    const user = await get(githubUserSelector);
-    console.log("user...");
-    console.log(user);
+    const user = await get(githubUserQuery);
     const url = `https://api.github.com/users/${user.login}/gists`;
 
     const data = await fetch(url, {
@@ -55,18 +51,12 @@ export const userGistsQuery = selector<Array<Gist>>({
     })
       .then((res) => {
         if (!res.ok) {
-          console.log;
-          // TODO throw してUIハンドリング
-          return new Promise((resolve, reject) => {
-            reject();
-          });
+          return Promise.reject();
         }
         return res.json();
       })
       .catch((error) => {
-        return new Promise((resolve, reject) => {
-          reject();
-        });
+        return Promise.reject();
       });
     return data;
   },
@@ -124,18 +114,24 @@ const useUsersGists = () => {
   const setGist = useRecoilCallback(
     ({ snapshot, set }) =>
       async (gistId: string) => {
-        const gists: Gist[] = await snapshot.getLoadable(userGistsQuery)
-          .contents;
-        const current = gists.find((g) => {
-          return g.id == gistId;
-        });
+        const current: Gist | undefined = await snapshot
+          .getPromise(userGistsQuery)
+          .then((gists) => {
+            const current = gists.find((g) => g.id == gistId);
+            if (current) {
+              return current;
+            } else {
+              return;
+            }
+          });
+
         if (current) {
           set(currentGistState, current);
         }
       }
   );
-  const resetGist = useRecoilCallback(({ reset }) => () => {
-    reset(currentGistState);
+  const resetGist = useRecoilCallback(({ reset }) => async () => {
+    await reset(currentGistState);
   });
   return { gists, setGist, gist, gistFiles, resetGist };
 };

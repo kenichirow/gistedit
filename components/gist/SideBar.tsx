@@ -13,10 +13,12 @@ const SideBarItem: React.FC<{ gistItem: Gist }> = ({ gistItem }) => {
       setSelect(gist.contents.id == gistItem.id);
     }
   }, [gist]);
+  const filename = Object.keys(gistItem.files)[0];
+
   return (
     <Link href={`/gist/${gistItem.id}`}>
       <li className={selected ? styles.gist_slected : ""}>
-        <span>{gistItem.id}</span>
+        <span>{filename}</span>
       </li>
     </Link>
   );
@@ -35,6 +37,14 @@ const SideBar = () => {
       </div>
     );
   }
-  return <>loading</>;
+  return (
+    <div className={styles.sidebar}>
+      <ul>
+        <li>
+          <span></span>
+        </li>
+      </ul>
+    </div>
+  );
 };
 export { SideBar };

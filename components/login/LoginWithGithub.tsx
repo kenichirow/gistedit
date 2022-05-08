@@ -1,17 +1,14 @@
 import { GitHubIcon } from "./GithubIcon";
 import styles from "../../styles/LoginWithGithub.module.css";
-import Link from "next/link";
-import { useGithubUser } from "../../states/user";
 import { useCallback } from "react";
 import { useRouter } from "next/router";
-import { useAccessTokenState } from "../../states/access_token";
+
 export const LoginWithGithub = () => {
-  const { login } = useGithubUser();
   const router = useRouter();
 
   const loginOnclick = useCallback(async () => {
-    return router.replace("/auth/login");
-  }, [login, router]);
+    router.replace("/auth/login");
+  }, [router]);
 
   return (
     <div className={styles.wrapper}>

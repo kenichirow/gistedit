@@ -9,24 +9,20 @@ import { useEffect } from "react";
 
 const GistPage: React.FC = () => {
   const router = useRouter();
-  const { user } = useGithubUser();
-  const gistId = router.query.id;
+  const gistId = router.query.id as string;
 
-  const { gist, setGist } = useUsersGists();
-  console.log("here");
+  const { login, user } = useGithubUser();
+  const { setGist } = useUsersGists();
+
   useEffect(() => {
-    console.log("set gist start");
-    console.log(user);
-    console.log(gist);
-    if (user.state == "hasValue" && !user.contents) {
-      router.replace("/");
-    }
-    setGist(gistId as string);
-    console.log("set gist end");
-    if (typeof window !== "undefined") {
-      return;
-    }
-  }, [user, gistId, router]);
+    (async () => {
+      if (user.state != "hasValue") {
+        await login();
+      }
+    })();
+
+    setGist(gistId);
+  }, [user, login, gistId, router]);
 
   return (
     <>

@@ -2,23 +2,17 @@ import { HeaderNavigation } from "./HeaderNavigation";
 import { githubUserAtom, useGithubUser } from "../../states/user";
 import React, { useCallback, useEffect, useState } from "react";
 import { Loadable, RecoilState, useRecoilCallback } from "recoil";
-import { GitHubUser } from "../../states/user";
 import { LogoutButton } from "../LogoutButton";
 
 import styles from "../../styles/Header.module.css";
 import { useRouter } from "next/router";
-import { useUsersGists } from "../../states/gist";
 import { accessTokenQuery } from "../../states/access_token";
 
-type headerProps = {
-  user: Loadable<GitHubUser>;
-  resetUser: () => void;
-};
-
-const Header: React.FC<headerProps> = ({ user, resetUser }) => {
+const Header: React.FC = () => {
   const router = useRouter();
   const [isLoggedin, setIsLoggedin] = useState(false);
-  const { user: userState } = useGithubUser();
+  const [showPulldown, setShwoPulldown] = useState(false);
+  const { user } = useGithubUser();
 
   const logout = useRecoilCallback(
     ({ snapshot, set, reset }) =>
@@ -30,6 +24,10 @@ const Header: React.FC<headerProps> = ({ user, resetUser }) => {
       },
     [router, setIsLoggedin]
   );
+
+  const show = useCallback(() => {
+    setShwoPulldown(true);
+  }, []);
 
   useEffect(() => {
     if (typeof window == "undefined") {
@@ -45,11 +43,18 @@ const Header: React.FC<headerProps> = ({ user, resetUser }) => {
     return (
       <div className={styles.header}>
         <HeaderNavigation />
-        <LogoutButton logoutCallback={logout} />
+        <div className={styles.avatarWrapper}>
+          <div className={styles.avatarImage}>
+            <img src={user.contents.avatar_url} alt="" width={23} height={23} />
+          </div>
+          <div className={styles.avatar}>{user.contents.name}</div>
+          <div onClick={show}>{" ↓ "}</div>
+          <LogoutButton show={showPulldown} logoutCallback={logout} />
+        </div>
       </div>
     );
   } else {
-    <div className={styles.header}></div>;
+    return <div className={styles.header}></div>;
   }
 };
 

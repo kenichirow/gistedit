@@ -17,28 +17,25 @@ import {
 import { accessTokenQuery } from "./access_token";
 
 export type GitHubUser = {
-  error?: boolean;
-  reason?: string;
   login?: string;
+  avatar_url?: string;
+  name?: string;
 };
 
-export const githubUserAtom = atom<GitHubUser>({
+export const githubUserState = atom<GitHubUser>({
   key: "myapp.kenichirow.com:user:atom",
 });
 
-const githubUserSelector = selector<GitHubUser>({
+const githubUserQuery = selector<GitHubUser>({
   key: "myapp.kenichirow.com:user:selector",
   get: async ({ get }) => {
+    const a = get(githubUserState);
+    if (a) {
+      return a;
+    }
+
     if (typeof window !== "undefined") {
-      const a = get(githubUserAtom);
-      console.log("........user 1");
-      if (a) {
-        if (a.login) {
-          return a;
-        }
-      }
       const x = localStorage.getItem("user");
-      console.log("........user 2");
       if (x) {
         return JSON.parse(x);
       } else {
@@ -55,10 +52,10 @@ const githubUserSelector = selector<GitHubUser>({
     if (typeof window !== "undefined") {
       if (newValue instanceof DefaultValue) {
         localStorage.removeItem("user");
-        reset(githubUserAtom);
+        reset(githubUserState);
         return;
       }
-      set(githubUserAtom, newValue);
+      set(githubUserState, newValue);
       localStorage.setItem("user", JSON.stringify(newValue));
     }
   },
@@ -83,16 +80,14 @@ export const fetchGithubUser = async (
     if (!res.ok) {
       throw new Error(res.statusText);
     }
-    const x = res.json();
-    console.log(x);
-    return x;
+    return res.json();
   });
   return data;
 };
 
 const useGithubUser = () => {
-  const [user, setUser] = useRecoilStateLoadable(githubUserSelector);
-  const resetUserState = useResetRecoilState(githubUserSelector);
+  const [user, setUser] = useRecoilStateLoadable(githubUserQuery);
+  const resetUserState = useResetRecoilState(githubUserQuery);
   const resetAccessToken = useResetRecoilState(accessTokenQuery);
   const [accessToken, _] = useRecoilStateLoadable(accessTokenQuery);
   const [isLoggedin, setIsLoggedIn] = useRecoilState(isLoggedinState);
@@ -102,45 +97,32 @@ const useGithubUser = () => {
     resetUserState();
   }, [resetUserState, resetAccessToken]);
 
-  useEffect(() => {
-    if (accessToken.state == "hasValue" && accessToken.contents != "") {
-      console.log(`User sttate: ${user.state}`);
-      if (user.state != "hasValue") {
-        fetchGithubUser(accessToken.contents)
-          .then((user: GitHubUser) => {
-            setUser(user);
-          })
-          .catch((e) => {
-            resetAccessToken();
-            resetUserState();
-          });
-      }
-    }
-  }, [accessToken, setUser, resetAccessToken, resetUserState]);
+  //  const resetUser = useRecoilCallback(({ reset }) => async () => {
+  //    reset(accessTokenQuery);
+  //    reset(githubUserQuery);
+  //  });
 
   const login = useRecoilCallback(
-    ({ set, snapshot }) => {
+    ({ set, snapshot, reset }) => {
       return async () => {
         if (accessToken.state == "hasValue" && accessToken.contents != "") {
-          console.log("found access token and try fetch user");
           return fetchGithubUser(accessToken.contents)
             .then((user: GitHubUser) => {
-              setUser(user);
+              set(githubUserQuery, user);
             })
             .catch((e) => {
-              resetAccessToken();
-              resetUserState();
+              reset(accessTokenQuery);
+              reset(githubUserState);
+              return Promise.resolve();
             });
         }
-        return new Promise((resolve, reject) => {
-          resolve("noop");
-        });
+        return Promise.resolve();
       };
     },
-    [isLoggedin, accessToken, setUser, resetUserState, resetAccessToken]
+    [isLoggedin, accessToken, accessTokenQuery, githubUserState]
   );
 
   return { user, login, resetUser, setUser };
 };
 
-export { useGithubUser, githubUserSelector };
+export { useGithubUser, githubUserQuery };

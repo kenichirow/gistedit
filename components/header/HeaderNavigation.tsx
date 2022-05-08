@@ -1,18 +1,18 @@
-import { GitHubUser, useGithubUser } from "../../states/user";
+import { useGithubUser } from "../../states/user";
 import styles from "../../styles/Header.module.css";
 import Link from "next/link";
 import React from "react";
-import { GistFile, useUsersGists } from "../../states/gist";
-import { GistList } from "../gist/GistList";
+import { useUsersGists } from "../../states/gist";
 
 const Gist = () => {
   const { gist } = useUsersGists();
   if (gist.state === "hasValue") {
     const filename = Object.keys(gist.contents.files)[0];
     return (
-      <div>
-        {" / "} {filename}
-      </div>
+      <p>
+        {":"}
+        {filename}
+      </p>
     );
   } else {
   }
@@ -29,7 +29,7 @@ const HeaderNavigation: React.FC = () => {
           <p>{user.contents.login}</p>
         </Link>
         <Gist />
-        <div>{<Link href={"/gist/new"}>{" + "}</Link>}</div>
+        <div>{<Link href={"/gist/new"}>{" new "}</Link>}</div>
       </div>
     );
   } else {

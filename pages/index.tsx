@@ -9,18 +9,22 @@ import { useRecoilValue } from "recoil";
 
 const HomePage: NextPage = () => {
   const [isLoggedin, setIsLoggedin] = useState(false);
-  const { user } = useGithubUser();
+  const { user, login } = useGithubUser();
   const { resetGist } = useUsersGists();
 
   useEffect(() => {
     if (typeof window === "undefined") {
       return;
     }
-    if (user.state == "hasValue" && user.contents) {
-      setIsLoggedin(true);
-    }
     resetGist();
-  }, [user, isLoggedin, setIsLoggedin]);
+    (async () => {
+      if (user.state == "hasValue" && user.contents) {
+        setIsLoggedin(true);
+      } else {
+        await login();
+      }
+    })();
+  }, [user, isLoggedin, login, setIsLoggedin]);
 
   return (
     <div>

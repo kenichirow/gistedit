@@ -1,6 +1,7 @@
+import React, { useEffect } from "react";
 import { GetServerSideProps, NextPage } from "next";
 import { useRouter } from "next/router";
-import React, { useEffect } from "react";
+
 import { useAccessTokenState } from "../../states/access_token";
 import { fetchGithubUser, GitHubUser, useGithubUser } from "../../states/user";
 
@@ -13,7 +14,7 @@ const Callback: React.FC<CallbackProps> = ({ newAccessToken, user }) => {
   const router = useRouter();
   const { accessToken, setAccessToken } = useAccessTokenState();
   const { user: userState, setUser } = useGithubUser();
-  console.log("callback");
+
   useEffect(() => {
     setAccessToken(newAccessToken);
     setUser(user);
@@ -25,7 +26,7 @@ const Callback: React.FC<CallbackProps> = ({ newAccessToken, user }) => {
       console.log(userState.contents);
       router.replace("/");
     }
-  }, [router, userState, accessToken, newAccessToken, setAccessToken]);
+  }, [router, userState, accessToken, newAccessToken]);
 
   return <></>;
 };

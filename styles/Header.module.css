@@ -3,7 +3,28 @@
 	padding: 10px;
 	display: flex;
 }
+
 .header .navigation {
+	display: flex;
+	font-size:20px;
 	font-weight: bold;
 	cursor: pointer;
+}
+
+.avatar{
+
+}
+.avatarWrapper{
+	display: flex;
+	width: 100%;
+    justify-content: flex-end;
+}
+
+.avatarImage{
+	width: 23px;
+	height: 23px;
+	border-radius: 11px;
+
+
+	overflow: hidden;
 }
