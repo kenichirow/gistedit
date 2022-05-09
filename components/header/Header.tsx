@@ -1,7 +1,7 @@
 import { HeaderNavigation } from "./HeaderNavigation";
 import { useGithubUser } from "../../states/user";
 import React, { useCallback, useState } from "react";
-import { LogoutButton } from "../LogoutButton";
+import { LogoutButton } from "./LogoutButton";
 
 import styles from "../../styles/Header.module.css";
 import { useRouter } from "next/router";
