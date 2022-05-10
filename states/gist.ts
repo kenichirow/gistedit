@@ -158,14 +158,15 @@ const useUsersGists = () => {
 
         const body = toPatchGistBody(updateFiles);
 
-        await fetch(url, {
+        return fetch(url, {
           method: "PATCH",
           headers: headers,
           body: JSON.stringify(body),
         }).then(async (res) => {
+          console.log(res);
           if (!res.ok) {
             console.log(res.text());
-            return;
+            return Promise.reject();
           }
         });
       }

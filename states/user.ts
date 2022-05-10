@@ -61,7 +61,7 @@ export const fetchGithubUser = async (
     },
   }).then((res) => {
     if (!res.ok) {
-      throw new Error(res.statusText);
+      return Promise.reject();
     }
     return res.json();
   });
@@ -91,10 +91,9 @@ const useGithubUser = () => {
             .catch((e) => {
               reset(accessTokenQuery);
               reset(githubUserState);
-              return Promise.resolve();
+              return e;
             });
         }
-        return Promise.resolve();
       });
     };
   });
