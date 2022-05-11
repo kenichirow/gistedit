@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
-import { useUsersGists } from "../../states/gist/gist";
-import { Gist, GistFile } from "../../states/gist/type";
+import { Gist, useUsersGists } from "../../states/gist";
 import Link from "next/link";
 
 import styles from "../../styles/Sidebar.module.css";

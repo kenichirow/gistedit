@@ -1,5 +1,4 @@
-import { useUsersGists } from "../../states/gist/gist";
-import { Gist } from "../../states/gist/type";
+import { Gist, useUsersGists } from "../../states/gist";
 import styles from "../../styles/GistCard.module.css";
 import { useCallback } from "react";
 import { useRouter } from "next/router";

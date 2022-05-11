@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { useUsersGists } from "../../states/gist/gist";
-import { GistFile } from "../../states/gist/type";
+import { GistFile, useUsersGists } from "../../states/gist";
 import styles from "../../styles/GistDetail.module.css";
 import { GistControl } from "./GistControl";
 import { GistFileContent } from "./GistFile";

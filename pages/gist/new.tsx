@@ -1,6 +1,5 @@
 import { useEffect } from "react";
-import { useUsersGists } from "../../states/gist/gist";
-import { Gist } from "../../states/gist/type";
+import { Gist, useUsersGists } from "../../states/gist";
 
 import styles from "../../styles/Content.module.css";
 
