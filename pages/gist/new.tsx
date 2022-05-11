@@ -1,7 +1,7 @@
 import { useEffect } from "react";
-import { useRecoilCallback } from "recoil";
-import { SideBar } from "../../components/gist/SideBar";
-import { Gist, useUsersGists } from "../../states/gist";
+import { useUsersGists } from "../../states/gist/gist";
+import { Gist } from "../../states/gist/type";
+
 import styles from "../../styles/Content.module.css";
 
 const GistPage: React.FC<{ gist: Gist }> = ({ gist }) => {

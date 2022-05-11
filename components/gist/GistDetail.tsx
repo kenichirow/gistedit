@@ -1,12 +1,14 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { useUsersGists, GistFile } from "../../states/gist";
+import { useUsersGists } from "../../states/gist/gist";
+import { GistFile } from "../../states/gist/type";
 import styles from "../../styles/GistDetail.module.css";
 import { GistControl } from "./GistControl";
 import { GistFileContent } from "./GistFile";
 
 const GistDetail: React.FC = () => {
-  const { gist, gistFiles, updateGist } = useUsersGists();
+  const { gist2, gistFiles, updateGist } = useUsersGists();
   const [localGistFiles, setLocalGistFiles] = useState<GistFile[]>([]);
+  const gist = gist2;
 
   useEffect(() => {
     if (gistFiles.state === "hasValue" && gistFiles.contents) {
