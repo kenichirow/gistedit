@@ -82,19 +82,19 @@ const useGithubUser = () => {
 
   const login = useRecoilCallback(({ set, snapshot, reset }) => {
     return async () => {
-      return snapshot.getPromise(accessTokenQuery).then((token) => {
-        if (token != "") {
-          return fetchGithubUser(token)
-            .then((user: GitHubUser) => {
+      return snapshot
+        .getPromise(accessTokenQuery)
+        .then((token) => {
+          if (token != "") {
+            return fetchGithubUser(token).then((user: GitHubUser) => {
               set(githubUserQuery, user);
-            })
-            .catch((e) => {
-              reset(accessTokenQuery);
-              reset(githubUserState);
-              return e;
             });
-        }
-      });
+          }
+        })
+        .catch((e) => {
+          reset(accessTokenQuery);
+          reset(githubUserQuery);
+        });
     };
   });
 

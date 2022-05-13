@@ -1,7 +1,7 @@
 import { useRecoilCallback, useRecoilValueLoadable, waitForAll } from "recoil";
 import { accessTokenQuery } from "../access_token";
 
-import { GistFile } from "./type";
+import { Gist, GistFile } from "./type";
 import {
   currentGistIdState,
   currentGistQuery,
@@ -25,31 +25,10 @@ const useUsersGists = () => {
   const updateGist = useRecoilCallback(
     ({ snapshot, refresh, reset }) =>
       async (updateFiles: GistFile[]) => {
-        // TODO wait for all
-        const gist = await snapshot.getLoadable(currentGistQuery).getValue();
-        const githubToken = await snapshot
-          .getLoadable(accessTokenQuery)
-          .getValue();
+        const gist = await snapshot.getPromise(currentGistQuery);
+        const githubToken = await snapshot.getPromise(accessTokenQuery);
 
-        const url = `https://api.github.com/gists/${gist.id}`;
-
-        if (githubToken === "") {
-          return Promise.reject();
-        }
-
-        const headers = {
-          "Content-type": "application/json",
-          Authorization: `token ${githubToken}`,
-          Accept: "application/vnd.github.v3+json",
-        };
-
-        const body = toPatchGistBody(updateFiles);
-
-        return fetch(url, {
-          method: "PATCH",
-          headers: headers,
-          body: JSON.stringify(body),
-        }).then(async (res) => {
+        patchGist(githubToken, gist.id, updateFiles).then(async (res) => {
           if (!res.ok) {
             console.log(res.text());
             return Promise.reject();
@@ -59,7 +38,6 @@ const useUsersGists = () => {
             refresh(currentGistFilesQuery);
             refresh(rawGisteFile(file.raw_url as string));
           });
-          // gist file をrefleshする
         });
       }
   );
@@ -80,9 +58,32 @@ const useUsersGists = () => {
   return { gists, gist2, setGist, gist, gistFiles, resetGist, updateGist };
 };
 
+const patchGist = (
+  githubToken: string,
+  gistId: string,
+  updateFiles: GistFile[]
+) => {
+  const url = `https://api.github.com/gists/${gistId}`;
+
+  const headers = {
+    "Content-type": "application/json",
+    Authorization: `token ${githubToken}`,
+    Accept: "application/vnd.github.v3+json",
+  };
+
+  const body = toPatchGistBody(updateFiles);
+
+  return fetch(url, {
+    method: "PATCH",
+    headers: headers,
+    body: JSON.stringify(body),
+  });
+};
+
 type patchGistBody = {
   files: { [filename: string]: { content: string } };
 };
+
 const toPatchGistBody = (gistFiles: GistFile[]): patchGistBody => {
   let body: patchGistBody = { files: {} };
 

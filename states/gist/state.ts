@@ -1,4 +1,4 @@
-import { atom, selector, selectorFamily, waitForAll } from "recoil";
+import { atom, selector, selectorFamily } from "recoil";
 
 import { Gist, GistFile, RawGistFile, RawGistFileURL } from "./type";
 import { accessTokenQuery } from "../access_token";
@@ -51,7 +51,7 @@ export const currentGistState = atom<Gist>({
   key: "myapp.kenichirow.com:gist:current",
 });
 
-export const currentGistQuery = selector({
+export const currentGistQuery = selector<Gist>({
   key: "myapp.kenichirow.com:gist:current:query",
   get: async ({ get }) => {
     return get(currentGistState);
