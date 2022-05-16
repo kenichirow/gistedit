@@ -1,13 +1,14 @@
-import { Gist, useUsersGists } from "../../states/gist";
 import styles from "../../styles/GistCard.module.css";
 import { useCallback } from "react";
 import { useRouter } from "next/router";
+import { Gist, useGists3 } from "../../states/gist2";
 
 type RepoProps = { gist: Gist };
 
 const GistCard: React.FC<RepoProps> = ({ gist }) => {
   const router = useRouter();
-  const { setGist } = useUsersGists();
+  //  const { setGist } = useUsersGists();
+  const { setGist } = useGists3();
 
   const onClick = useCallback(() => {
     setGist(gist.id);

@@ -53,7 +53,7 @@ export const gistsAtom = atom<Gist[]>({
 });
 
 export const currentGistQuery2 = selector({
-  key: "myapp.kenichirow.com:gist:current:query2",
+  key: "myapp.kenichirow.com:gist:current:query3",
   get: async ({ get }) => {
     const f = get(currentGistIdState);
     const x = get(userGistsQuery);
@@ -66,7 +66,7 @@ export const currentGistState = atom<Gist>({
 });
 
 export const currentGistQuery = selector<Gist>({
-  key: "myapp.kenichirow.com:gist:current:query",
+  key: "myapp.kenichirow.com:gist:current:query2",
   get: async ({ get }) => {
     return get(currentGistState);
   },

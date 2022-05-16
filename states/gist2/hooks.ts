@@ -137,7 +137,10 @@ const useGists3 = () => {
   const getGists = useRecoilCallback(({ snapshot }) => () => {
     return snapshot.getLoadable(gistsAtom);
   });
-  return { getGist, getGists, getCurrentGist, fetchGists };
+  const setGist = useRecoilCallback(({ snapshot, set }) => (id: string) => {
+    return set(currentGistIdState, id);
+  });
+  return { getGist, getGists, getCurrentGist, fetchGists, setGist };
 };
 
 export { useGists3, useUsersGists };

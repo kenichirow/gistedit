@@ -4,7 +4,7 @@ import { useRouter } from "next/router";
 import { SideBar } from "../../components/gist/SideBar";
 import { GistDetail } from "../../components/gist/GistDetail";
 import { useGithubUser } from "../../states/user";
-import { useUsersGists } from "../../states/gist";
+import { useGists3 } from "../../states/gist2";
 
 import styles from "../../styles/Content.module.css";
 
@@ -13,10 +13,9 @@ const GistPage: React.FC = () => {
   const gistId = router.query.id as string;
 
   const { login, user } = useGithubUser();
-  const { setGist, gist2 } = useUsersGists();
+  const { setGist, getCurrentGist } = useGists3();
 
   useEffect(() => {
-    console.log(gist2.contents);
     (async () => {
       if (user.state !== "hasValue") {
         await login();
@@ -24,7 +23,11 @@ const GistPage: React.FC = () => {
     })();
 
     setGist(gistId);
-  }, [user, gist2, login, gistId, router]);
+  }, [user, login, gistId, router]);
+
+  if (getCurrentGist().state == "hasValue") {
+    return <></>;
+  }
 
   return (
     <>

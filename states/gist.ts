@@ -70,7 +70,7 @@ const currentGistState = atom<Gist>({
 });
 
 const currentGistQuery = selector({
-  key: "myapp.kenichirow.com:gist:current:query",
+  key: "myapp.kenichirow.com:gist:current:query9",
   get: async ({ get }) => {
     return get(currentGistState);
   },

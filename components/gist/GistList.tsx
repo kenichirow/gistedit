@@ -1,8 +1,9 @@
 import { GistCard } from "./GistCard";
-import { useUsersGists } from "../../states/gist";
+import { useGists3 } from "../../states/gist2";
 
 const GistList = () => {
-  const { gists } = useUsersGists();
+  const { getGists } = useGists3();
+  const gists = getGists();
 
   if (gists.state === "hasValue") {
     return (

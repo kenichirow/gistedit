@@ -7,7 +7,7 @@ import { GistList } from "../components/gist/GistList";
 import { useUsersGists } from "../states/gist";
 import { useRecoilValue } from "recoil";
 
-import { useGists3 } from "../states/gist/hooks";
+import { useGists3 } from "../states/gist2";
 
 const HomePage: NextPage = () => {
   const [isLoggedin, setIsLoggedin] = useState(false);
