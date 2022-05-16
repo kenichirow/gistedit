@@ -72,6 +72,14 @@ export const currentGistQuery = selector<Gist>({
   },
 });
 
+export const gistFileAtom = atomFamily<Gist, string>({
+  key: "myapp.kenichirow.com:gist:file:1",
+});
+
+export const gistFileRawAtom = atomFamily<string, string>({
+  key: "myapp.kenichirow.com:gist:file:raw:1",
+});
+
 export const currentGistFilesQuery = selector({
   key: "myapp.kenichirow.com:gist:current:files:query",
   get: async ({ get }) => {
@@ -95,8 +103,6 @@ export const rawGisteFile = selectorFamily<RawGistFile, RawGistFileURL>({
   get:
     (fileName) =>
     async ({ get }) => {
-      console.log("---------  1234  ---------");
-      console.log(fileName);
       if (fileName == "") {
         return "";
       }

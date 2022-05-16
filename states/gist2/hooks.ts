@@ -6,6 +6,8 @@ import { Gist, GistFile } from "./type";
 import {
   gistAtom,
   gistsAtom,
+  gistFileAtom,
+  gistFileRawAtom,
   currentGistIdState,
   currentGistQuery,
   currentGistQuery2,
@@ -140,7 +142,38 @@ const useGists3 = () => {
   const setGist = useRecoilCallback(({ snapshot, set }) => (id: string) => {
     return set(currentGistIdState, id);
   });
-  return { getGist, getGists, getCurrentGist, fetchGists, setGist };
+
+  const getGistFile = useRecoilCallback(({ snapshot }) => () => {});
+
+  const fetchGistFile = useRecoilCallback(({ snapshot, set }) => async () => {
+    const id = snapshot.getLoadable(currentGistIdState).getValue();
+    const gist = snapshot.getLoadable(gistAtom(id)).getValue();
+    const rawfiles = Object.keys(gist.files).map((key) => {
+      const g = gist.files[key];
+      const url = g.raw_url as string;
+      return fetch(url)
+        .then((res) => res.text())
+        .then((data) => {
+          set(gistFileRawAtom(g.filename), data);
+        });
+    });
+
+    await Promise.all(rawfiles);
+  });
+
+  const getCurrentGistFiles = useRecoilCallback(({ snapshot }) => () => {
+    const id = snapshot.getLoadable(currentGistIdState).getValue();
+    const gist = snapshot.getLoadable(gistAtom(id)).getValue();
+  });
+
+  return {
+    getGist,
+    getGists,
+    getGistFile,
+    getCurrentGist,
+    fetchGists,
+    setGist,
+  };
 };
 
 export { useGists3, useUsersGists };
