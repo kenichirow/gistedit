@@ -7,10 +7,13 @@ import { GistList } from "../components/gist/GistList";
 import { useUsersGists } from "../states/gist";
 import { useRecoilValue } from "recoil";
 
+import { useGists3 } from "../states/gist/hooks";
+
 const HomePage: NextPage = () => {
   const [isLoggedin, setIsLoggedin] = useState(false);
   const { user, login } = useGithubUser();
   const { resetGist } = useUsersGists();
+  const { fetchGists } = useGists3();
 
   useEffect(() => {
     if (typeof window === "undefined") {
@@ -20,6 +23,7 @@ const HomePage: NextPage = () => {
     (async () => {
       if (user.state == "hasValue" && user.contents) {
         setIsLoggedin(true);
+        fetchGists();
       } else {
         setIsLoggedin(false);
         await login();

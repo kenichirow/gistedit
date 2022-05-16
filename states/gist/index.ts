@@ -1,2 +1,2 @@
-export { useUsersGists } from "./hooks";
+export { useUsersGists, useGists3 } from "./hooks";
 export * from "./type";

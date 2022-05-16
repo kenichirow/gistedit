@@ -1,8 +1,11 @@
 import { useRecoilCallback, useRecoilValueLoadable, waitForAll } from "recoil";
 import { accessTokenQuery } from "../access_token";
+import { githubUserQuery } from "../user";
 
 import { Gist, GistFile } from "./type";
 import {
+  gistAtom,
+  gistsAtom,
   currentGistIdState,
   currentGistQuery,
   currentGistQuery2,
@@ -95,4 +98,46 @@ const toPatchGistBody = (gistFiles: GistFile[]): patchGistBody => {
   return body;
 };
 
-export { useUsersGists };
+const useGists3 = () => {
+  const fetchGists = useRecoilCallback(({ snapshot, set }) => async () => {
+    const githubToken = await snapshot.getPromise(accessTokenQuery);
+    const user = await snapshot.getPromise(githubUserQuery);
+    const url = `https://api.github.com/users/${user.login}/gists`;
+    const data = await fetch(url, {
+      method: "GET",
+      headers: {
+        Accept: "application/json",
+        Authorization: `token ${githubToken}`,
+      },
+    })
+      .then((res) => {
+        if (!res.ok) {
+          return Promise.reject();
+        }
+        const gists2 = res.json();
+        return gists2;
+      })
+      .catch((error) => {
+        return error;
+      });
+    set(gistsAtom, data);
+    console.log(data);
+    data.forEach((gist: Gist) => {
+      console.log(gist);
+      set(gistAtom(gist.url), gist);
+    });
+  });
+  const getGist = useRecoilCallback(({ snapshot }) => async (id: string) => {
+    return snapshot.getPromise(gistAtom(id));
+  });
+  const getCurrentGist = useRecoilCallback(({ snapshot }) => () => {
+    const id = snapshot.getLoadable(currentGistIdState).getValue();
+    return snapshot.getLoadable(gistAtom(id));
+  });
+  const getGists = useRecoilCallback(({ snapshot }) => () => {
+    return snapshot.getLoadable(gistsAtom);
+  });
+  return { getGist, getGists, getCurrentGist, fetchGists };
+};
+
+export { useGists3, useUsersGists };
