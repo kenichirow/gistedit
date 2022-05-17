@@ -2,8 +2,7 @@ import { GistCard } from "./GistCard";
 import { useGists3 } from "../../states/gist2";
 
 const GistList = () => {
-  const { getGists } = useGists3();
-  const gists = getGists();
+  const { gists } = useGists3();
 
   if (gists.state === "hasValue") {
     return (

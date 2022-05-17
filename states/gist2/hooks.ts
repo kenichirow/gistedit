@@ -101,6 +101,7 @@ const toPatchGistBody = (gistFiles: GistFile[]): patchGistBody => {
 };
 
 const useGists3 = () => {
+  const gists = useRecoilValueLoadable(gistsAtom);
   const fetchGists = useRecoilCallback(({ snapshot, set }) => async () => {
     const githubToken = await snapshot.getPromise(accessTokenQuery);
     const user = await snapshot.getPromise(githubUserQuery);
@@ -167,10 +168,12 @@ const useGists3 = () => {
   });
 
   return {
+    gists,
     getGist,
     getGists,
     getGistFile,
     getCurrentGist,
+    fetchGistFile,
     fetchGists,
     setGist,
   };
