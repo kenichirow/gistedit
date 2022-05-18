@@ -5,12 +5,15 @@ import { GistControl } from "./GistControl";
 import { GistFileContent } from "./GistFile";
 
 const GistDetail: React.FC = () => {
-  const { getCurrentGist, getCurrentGistFiles } = useGists3();
+  const { getCurrentGist, getCurrentGistFiles, fetchGistFile } = useGists3();
   const [localGistFiles, setLocalGistFiles] = useState<GistFile[]>([]);
   const gist = getCurrentGist();
   const gistFiles = getCurrentGistFiles();
 
   useEffect(() => {
+    fetchGistFile().then((res) => {
+      console.log(res);
+    });
     if (gistFiles.state === "hasValue" && gistFiles.contents) {
       setLocalGistFiles(gistFiles.contents);
     }

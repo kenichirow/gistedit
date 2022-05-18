@@ -173,6 +173,7 @@ const useGists3 = () => {
     getGists,
     getGistFile,
     getCurrentGist,
+    getCurrentGistFiles,
     fetchGistFile,
     fetchGists,
     setGist,
