@@ -101,7 +101,10 @@ const toPatchGistBody = (gistFiles: GistFile[]): patchGistBody => {
 };
 
 const useGists3 = () => {
+  const gist = useRecoilValueLoadable(currentGistState);
   const gists = useRecoilValueLoadable(gistsAtom);
+  const gistFiles = useRecoilValueLoadable(currentGistFilesQuery);
+
   const fetchGists = useRecoilCallback(({ snapshot, set }) => async () => {
     const githubToken = await snapshot.getPromise(accessTokenQuery);
     const user = await snapshot.getPromise(githubUserQuery);
@@ -162,13 +165,20 @@ const useGists3 = () => {
     await Promise.all(rawfiles);
   });
 
-  const getCurrentGistFiles = useRecoilCallback(({ snapshot }) => () => {
+  const getCurrentGistFiles = useRecoilCallback(({ snapshot, set }) => () => {
     const id = snapshot.getLoadable(currentGistIdState).getValue();
     const gist = snapshot.getLoadable(gistAtom(id)).getValue();
+    const gistFiles = Object.keys(gist.files).forEach((f) => {
+      const file = gist.files[f];
+      return snapshot.getLoadable(gistFileRawAtom(file.filename)).getValue();
+    });
+    return gistFiles;
   });
 
   return {
+    gist,
     gists,
+    gistFiles,
     getGist,
     getGists,
     getGistFile,

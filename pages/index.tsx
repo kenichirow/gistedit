@@ -13,7 +13,7 @@ const HomePage: NextPage = () => {
   const [isLoggedin, setIsLoggedin] = useState(false);
   const { user, login } = useGithubUser();
   const { resetGist } = useUsersGists();
-  const { fetchGists } = useGists3();
+  const { gists, fetchGists } = useGists3();
 
   useEffect(() => {
     if (typeof window === "undefined") {
@@ -23,13 +23,16 @@ const HomePage: NextPage = () => {
     (async () => {
       if (user.state == "hasValue" && user.contents) {
         setIsLoggedin(true);
+        if (gists.state === "hasValue") {
+          return;
+        }
         fetchGists();
       } else {
         setIsLoggedin(false);
         await login();
       }
     })();
-  }, [user, isLoggedin, login, setIsLoggedin]);
+  }, [user, isLoggedin, login, fetchGists, setIsLoggedin]);
 
   return (
     <div>
