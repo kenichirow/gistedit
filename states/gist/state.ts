@@ -10,36 +10,6 @@ import { Gist, GistFile, RawGistFile, RawGistFileURL } from "./type";
 import { accessTokenQuery } from "../access_token";
 import { githubUserQuery } from "../user";
 
-export const userGistsQuery = selector<Array<Gist>>({
-  key: "myapp.kenichirow.com:gist:gists",
-  get: async ({ get }) => {
-    const githubToken = await get(accessTokenQuery);
-    if (githubToken == "") {
-      return Promise.reject();
-    }
-    const user = await get(githubUserQuery);
-    const url = `https://api.github.com/users/${user.login}/gists`;
-
-    const data = await fetch(url, {
-      method: "GET",
-      headers: {
-        Accept: "application/json",
-        Authorization: `token ${githubToken}`,
-      },
-    })
-      .then((res) => {
-        if (!res.ok) {
-          return Promise.reject();
-        }
-        return res.json();
-      })
-      .catch((error) => {
-        return error;
-      });
-    return data;
-  },
-});
-
 export const currentGistIdState = atom<string>({
   key: "myapp.kenichirow.com:gist:current:id",
 });
@@ -52,24 +22,16 @@ export const gistsAtom = atom<Gist[]>({
   key: "myapp.kenichirow.com:gists2",
 });
 
-export const currentGistQuery2 = selector({
+export const currentGistQuery = selector({
   key: "myapp.kenichirow.com:gist:current:query3",
   get: async ({ get }) => {
     const f = get(currentGistIdState);
-    const x = get(userGistsQuery);
-    return x.find((g) => g.id == f);
+    return get(gistAtom(f));
   },
 });
 
 export const currentGistState = atom<Gist>({
   key: "myapp.kenichirow.com:gist:current",
-});
-
-export const currentGistQuery = selector<Gist>({
-  key: "myapp.kenichirow.com:gist:current:query2",
-  get: async ({ get }) => {
-    return get(currentGistState);
-  },
 });
 
 export const gistFileAtom = atomFamily<Gist, string>({

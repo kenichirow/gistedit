@@ -1,26 +1,23 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { GistFile, useGists3 } from "../../states/gist2";
+import { GistFile, useGist, useGists } from "../../states/gist";
 import styles from "../../styles/GistDetail.module.css";
 import { GistControl } from "./GistControl";
 import { GistFileContent } from "./GistFile";
 
-const GistDetail: React.FC = () => {
-  const { gist, gistFiles, fetchGistFile } = useGists3();
+const GistDetail: React.FC<{ gistId: string }> = ({ gistId }) => {
+  const { gist, gistFiles, updateGist, fetchGistFile } = useGist();
   const [localGistFiles, setLocalGistFiles] = useState<GistFile[]>([]);
 
   useEffect(() => {
-    console.log("use efect");
-    if (localGistFiles == []) {
-      console.log("fetch gists");
-      fetchGistFile().then((res) => {
-        console.log(res);
-      });
-    }
-
     if (gistFiles.state === "hasValue" && gistFiles.contents) {
       setLocalGistFiles(gistFiles.contents);
+    } else {
+      fetchGistFile().catch((e) => {
+        console.log("ERRRRRRRRRRR");
+        console.log(e);
+      });
     }
-  }, [gistFiles, fetchGistFile, localGistFiles]);
+  }, [gistId, gistFiles, fetchGistFile, localGistFiles]);
 
   const onGistFileChange = useCallback(
     (filename: string, content: string) => {
@@ -64,7 +61,7 @@ const GistDetail: React.FC = () => {
       </article>
     );
   } else {
-    return <div></div>;
+    return <div> {"loading..."}</div>;
   }
 };
 

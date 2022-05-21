@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
-import { Gist, useUsersGists } from "../../states/gist";
+import { Gist, useGists, useGist } from "../../states/gist";
 import Link from "next/link";
 
 import styles from "../../styles/Sidebar.module.css";
 
 const SideBarItem: React.FC<{ gistItem: Gist }> = ({ gistItem }) => {
-  const { gist } = useUsersGists();
+  const { gist } = useGist();
   const [selected, setSelect] = useState(false);
 
   useEffect(() => {
@@ -26,7 +26,7 @@ const SideBarItem: React.FC<{ gistItem: Gist }> = ({ gistItem }) => {
 };
 
 const SideBar = () => {
-  const { gists } = useUsersGists();
+  const { gists } = useGists();
   if (gists.state == "hasValue" && gists.contents) {
     return (
       <div className={styles.sidebar}>

@@ -2,10 +2,10 @@ import { useGithubUser } from "../../states/user";
 import styles from "../../styles/Header.module.css";
 import Link from "next/link";
 import React from "react";
-import { useUsersGists } from "../../states/gist";
+import { useGist } from "../../states/gist";
 
 const Gist = () => {
-  const { gist } = useUsersGists();
+  const { gist } = useGist();
   if (gist.state === "hasValue") {
     const filename = Object.keys(gist.contents.files)[0];
     return (
