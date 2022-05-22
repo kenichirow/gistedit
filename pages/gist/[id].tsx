@@ -13,7 +13,7 @@ const GistPage: React.FC = () => {
   const gistId = router.query.id as string;
 
   const { login, user } = useGithubUser();
-  const { setGist, gist } = useGist();
+  const { setGist, gist, fetchGistFile } = useGist();
   const { gists, fetchGists } = useGists();
 
   useEffect(() => {
@@ -22,22 +22,18 @@ const GistPage: React.FC = () => {
         await login();
       }
     })();
-    console.log(gistId);
 
     if (gists.state != "hasValue") {
-      console.log("fetch gists start");
       fetchGists()
         .then(() => {
-          setGist(gistId);
+          setGist(gistId).then(fetchGistFile);
         })
         .catch(() => {
           console.log("ER");
         });
     } else {
-      console.log("else fetch gists start");
-      setGist(gistId);
+      setGist(gistId).then(fetchGistFile);
     }
-    console.log(gistId);
   }, [user, setGist, fetchGists, gists, login, gistId, router]);
 
   if (gist.state != "hasValue") {

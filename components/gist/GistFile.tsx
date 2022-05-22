@@ -8,7 +8,6 @@ const GistFileContent: React.FC<{
 }> = ({ file, onChange }) => {
   const onTextAreaOnChange = useCallback(
     (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-      console.log("on change");
       onChange(file.filename, e.target.value);
     },
     [file]

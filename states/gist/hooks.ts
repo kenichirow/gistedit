@@ -31,41 +31,54 @@ const useGist = () => {
     await reset(currentGistState);
   });
 
+  /**
+   * updateGist
+   * gist fileの更新
+   */
   const updateGist = useRecoilCallback(
-    ({ snapshot, refresh, reset }) =>
+    ({ snapshot, set, refresh, reset }) =>
       async (updateFiles: GistFile[]) => {
         const gist = snapshot.getLoadable(currentGistQuery).getValue();
         const githubToken = snapshot.getLoadable(accessTokenQuery).getValue();
 
-        patchGist(githubToken, gist.id, updateFiles)
+        return patchGist(githubToken, gist.id, updateFiles)
           .then(async (res) => {
             if (!res.ok) {
               return Promise.reject();
             }
             refresh(gistsAtom);
-            updateFiles.forEach((file) => {
-              refresh(currentGistFilesQuery);
-            });
+            set(currentGistState, await res.json());
+            console.log("fooo");
           })
           .then(fetchGistFile);
       }
   );
 
-  const fetchGistFile = useRecoilCallback(({ snapshot, set }) => async () => {
-    const id = snapshot.getLoadable(currentGistIdState).getValue();
-    const gist = snapshot.getLoadable(gistAtom(id)).getValue();
-    const rawfiles = Object.keys(gist.files).map((key) => {
-      const g = gist.files[key];
-      const url = g.raw_url as string;
-      return fetch(url)
-        .then((res) => res.text())
-        .then((data) => {
-          set(gistFileRawAtom(g.filename), data);
+  const fetchGistFile = useRecoilCallback(
+    ({ snapshot, set, refresh }) =>
+      async () => {
+        const id = snapshot.getLoadable(currentGistIdState).getValue();
+        const gist = snapshot.getLoadable(gistAtom(id)).getValue();
+        const rawfiles = Object.keys(gist.files).map((key) => {
+          const g = gist.files[key];
+          const url = g.raw_url as string;
+          refresh(gistFileRawAtom(g.filename));
+          return fetch(url)
+            .then((res) => res.text())
+            .then((data) => {
+              console.log("set");
+              set(gistFileRawAtom(g.filename), data);
+              return g.filename;
+            });
         });
-    });
 
-    await Promise.all(rawfiles);
-  });
+        return Promise.all(rawfiles).then((filenames) => {
+          filenames.map((f) => {
+            refresh(gistFileRawAtom(f));
+          });
+        });
+      }
+  );
 
   const setGist = useRecoilCallback(
     ({ snapshot, set }) =>

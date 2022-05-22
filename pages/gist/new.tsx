@@ -1,10 +1,10 @@
 import { useEffect } from "react";
-import { Gist, useUsersGists } from "../../states/gist";
+import { Gist, useGists } from "../../states/gist";
 
 import styles from "../../styles/Content.module.css";
 
 const GistPage: React.FC<{ gist: Gist }> = ({ gist }) => {
-  const { resetGist } = useUsersGists();
+  const { resetGist } = useGists();
   useEffect(() => {
     resetGist();
   });

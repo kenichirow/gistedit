@@ -5,30 +5,31 @@ import { GistControl } from "./GistControl";
 import { GistFileContent } from "./GistFile";
 
 const GistDetail: React.FC<{ gistId: string }> = ({ gistId }) => {
-  const { gist, gistFiles, updateGist, fetchGistFile } = useGist();
-  const [initialized, setInitialized] = useState(false);
+  const { gist, gistFiles, updateGist } = useGist();
   const [localGistFiles, setLocalGistFiles] = useState<GistFile[]>([]);
+  const [init, setInit] = useState(false);
 
   useEffect(() => {
     if (gistFiles.state === "hasValue" && gistFiles.contents) {
-      if (!initialized) {
-        setLocalGistFiles(gistFiles.contents);
-        setInitialized(true);
-      }
+      setLocalGistFiles(gistFiles.contents);
+      console.log("set");
+
+      setInit(gist.state === "hasValue" && gist.contents.id === gistId);
+    } else {
+      console.log(gistFiles);
     }
-    fetchGistFile();
-  }, [gistFiles, fetchGistFile, initialized]);
+  }, [gist, init, gistFiles, gistId]);
 
   const onGistFileChange = useCallback(
     (filename: string, content: string) => {
-      const newFiles = localGistFiles.map((f) => {
-        if (f.filename == filename) {
-          return { ...f, raw: content };
-        }
-        return f;
+      setLocalGistFiles((localGistFiles) => {
+        return localGistFiles.map((f) => {
+          if (f.filename === filename) {
+            return { ...f, raw: content };
+          }
+          return f;
+        });
       });
-      console.log(newFiles);
-      setLocalGistFiles(newFiles);
     },
     [localGistFiles]
   );
