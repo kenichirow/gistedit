@@ -7,8 +7,6 @@ import {
 } from "recoil";
 
 import { Gist, GistFile, RawGistFile, RawGistFileURL } from "./type";
-import { accessTokenQuery } from "../access_token";
-import { githubUserQuery } from "../user";
 
 export const currentGistIdState = atom<string>({
   key: "myapp.kenichirow.com:gist:current:id",

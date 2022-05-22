@@ -6,18 +6,18 @@ import { GistFileContent } from "./GistFile";
 
 const GistDetail: React.FC<{ gistId: string }> = ({ gistId }) => {
   const { gist, gistFiles, updateGist, fetchGistFile } = useGist();
+  const [initialized, setInitialized] = useState(false);
   const [localGistFiles, setLocalGistFiles] = useState<GistFile[]>([]);
 
   useEffect(() => {
     if (gistFiles.state === "hasValue" && gistFiles.contents) {
-      setLocalGistFiles(gistFiles.contents);
-    } else {
-      fetchGistFile().catch((e) => {
-        console.log("ERRRRRRRRRRR");
-        console.log(e);
-      });
+      if (!initialized) {
+        setLocalGistFiles(gistFiles.contents);
+        setInitialized(true);
+      }
     }
-  }, [gistId, gistFiles, fetchGistFile, localGistFiles]);
+    fetchGistFile();
+  }, [gistFiles, fetchGistFile, initialized]);
 
   const onGistFileChange = useCallback(
     (filename: string, content: string) => {
@@ -27,6 +27,7 @@ const GistDetail: React.FC<{ gistId: string }> = ({ gistId }) => {
         }
         return f;
       });
+      console.log(newFiles);
       setLocalGistFiles(newFiles);
     },
     [localGistFiles]

@@ -37,25 +37,23 @@ const useGist = () => {
         const gist = snapshot.getLoadable(currentGistQuery).getValue();
         const githubToken = snapshot.getLoadable(accessTokenQuery).getValue();
 
-        patchGist(githubToken, gist.id, updateFiles).then(async (res) => {
-          if (!res.ok) {
-            console.log(res.text());
-            return Promise.reject();
-          }
-          refresh(gistsAtom);
-          updateFiles.forEach((file) => {
-            refresh(currentGistFilesQuery);
-          });
-        });
+        patchGist(githubToken, gist.id, updateFiles)
+          .then(async (res) => {
+            if (!res.ok) {
+              return Promise.reject();
+            }
+            refresh(gistsAtom);
+            updateFiles.forEach((file) => {
+              refresh(currentGistFilesQuery);
+            });
+          })
+          .then(fetchGistFile);
       }
   );
 
   const fetchGistFile = useRecoilCallback(({ snapshot, set }) => async () => {
-    console.log("fetch gist!!!!!");
     const id = snapshot.getLoadable(currentGistIdState).getValue();
-    console.log(id);
     const gist = snapshot.getLoadable(gistAtom(id)).getValue();
-    console.log(gist);
     const rawfiles = Object.keys(gist.files).map((key) => {
       const g = gist.files[key];
       const url = g.raw_url as string;
@@ -75,8 +73,6 @@ const useGist = () => {
         snapshot
           .getPromise(gistsAtom)
           .then((gists) => {
-            console.log("set Gist");
-            console.log("current");
             const current = gists.find((g) => g.id == gistId);
             if (current) {
               set(currentGistState, current);
@@ -113,7 +109,6 @@ const useGists = () => {
     const githubToken = await snapshot.getPromise(accessTokenQuery);
     const user = await snapshot.getPromise(githubUserQuery);
     const url = `https://api.github.com/users/${user.login}/gists`;
-    console.log("fetchGists");
     const data = await fetch(url, {
       method: "GET",
       headers: {
@@ -122,20 +117,16 @@ const useGists = () => {
       },
     })
       .then((res) => {
-        console.log("-->>>");
         if (!res.ok) {
-          console.log("ERR");
           return Promise.reject();
         }
         const gists2 = res.json();
         return gists2;
       })
       .catch((error) => {
-        console.log("ERR");
         return error;
       });
     set(gistsAtom, data);
-    console.log(data);
     data.forEach((gist: Gist) => {
       set(gistAtom(gist.id), gist);
     });
