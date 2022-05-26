@@ -1,9 +1,4 @@
-import {
-  snapshot_UNSTABLE,
-  useRecoilCallback,
-  useRecoilValueLoadable,
-  waitForAll,
-} from "recoil";
+import { useRecoilCallback, useRecoilValueLoadable } from "recoil";
 import { accessTokenQuery } from "../access_token";
 import { githubUserQuery } from "../user";
 
@@ -12,10 +7,9 @@ import {
   gistAtom,
   gistsAtom,
   gistFileRawAtom,
-  currentGistIdState,
+  currentGistIdAtom,
   currentGistQuery,
   currentGistFilesQuery,
-  currentGistState,
 } from "./state";
 
 /**
@@ -27,16 +21,12 @@ const useGist = () => {
   const gist = useRecoilValueLoadable(currentGistQuery);
   const gistFiles = useRecoilValueLoadable(currentGistFilesQuery);
 
-  const resetGist = useRecoilCallback(({ reset }) => async () => {
-    await reset(currentGistState);
-  });
-
   /**
    * updateGist
    * gist fileの更新
    */
   const updateGist = useRecoilCallback(
-    ({ snapshot, set, refresh, reset }) =>
+    ({ snapshot, set }) =>
       async (updateFiles: GistFile[]) => {
         const gist = snapshot.getLoadable(currentGistQuery).getValue();
         const githubToken = snapshot.getLoadable(accessTokenQuery).getValue();
@@ -46,64 +36,44 @@ const useGist = () => {
             if (!res.ok) {
               return Promise.reject();
             }
-            refresh(gistsAtom);
-            set(currentGistState, await res.json());
-            console.log("fooo");
+            return res.json();
           })
-          .then(fetchGistFile);
+          .then((updatedGist) => {
+            set(gistAtom(gist.id), updatedGist);
+          });
       }
   );
 
   const fetchGistFile = useRecoilCallback(
     ({ snapshot, set, refresh }) =>
       async () => {
-        const id = snapshot.getLoadable(currentGistIdState).getValue();
+        const id = snapshot.getLoadable(currentGistIdAtom).getValue();
         const gist = snapshot.getLoadable(gistAtom(id)).getValue();
-        const rawfiles = Object.keys(gist.files).map((key) => {
-          const g = gist.files[key];
-          const url = g.raw_url as string;
-          refresh(gistFileRawAtom(g.filename));
+
+        const rawfilesRequests = Object.keys(gist.files).map((key) => {
+          const file = gist.files[key];
+          const url = file.raw_url as string;
           return fetch(url)
             .then((res) => res.text())
             .then((data) => {
-              console.log("set");
-              set(gistFileRawAtom(g.filename), data);
-              return g.filename;
+              set(gistFileRawAtom(file.filename), data);
+              return file.filename;
             });
         });
 
-        return Promise.all(rawfiles).then((filenames) => {
-          filenames.map((f) => {
-            refresh(gistFileRawAtom(f));
-          });
-        });
+        return Promise.all(rawfilesRequests).then((filenames) => {});
       }
   );
 
-  const setGist = useRecoilCallback(
-    ({ snapshot, set }) =>
-      async (gistId: string) => {
-        snapshot
-          .getPromise(gistsAtom)
-          .then((gists) => {
-            const current = gists.find((g) => g.id == gistId);
-            if (current) {
-              set(currentGistState, current);
-              set(currentGistIdState, current.id);
-            }
-          })
-          .catch((e) => {
-            console.log(e);
-          });
-      }
-  );
+  const setGist = useRecoilCallback(({ set }) => async (gistId: string) => {
+    set(currentGistIdAtom, gistId);
+  });
 
   return {
     gist,
     gistFiles,
     setGist,
     fetchGistFile,
-    resetGist,
     updateGist,
   };
 };
@@ -114,9 +84,7 @@ const useGist = () => {
  * Gistのリスト
  */
 const useGists = () => {
-  const gist = useRecoilValueLoadable(currentGistState);
   const gists = useRecoilValueLoadable(gistsAtom);
-  const gistFiles = useRecoilValueLoadable(currentGistFilesQuery);
 
   const fetchGists = useRecoilCallback(({ snapshot, set }) => async () => {
     const githubToken = await snapshot.getPromise(accessTokenQuery);
@@ -145,20 +113,11 @@ const useGists = () => {
     });
   });
 
-  const setGist = useRecoilCallback(({ set }) => (id: string) => {
-    return set(currentGistIdState, id);
-  });
-
   return {
-    gist,
     gists,
-    gistFiles,
     fetchGists,
-    setGist,
   };
 };
-
-export { useGists, useGist };
 
 const patchGist = (
   githubToken: string,
@@ -196,3 +155,5 @@ const toPatchGistBody = (gistFiles: GistFile[]): patchGistBody => {
   });
   return body;
 };
+
+export { useGists, useGist };

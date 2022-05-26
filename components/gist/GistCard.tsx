@@ -1,7 +1,6 @@
 import styles from "../../styles/GistCard.module.css";
-import { useCallback } from "react";
 import { useRouter } from "next/router";
-import { Gist, useGist } from "../../states/gist";
+import { Gist } from "../../states/gist";
 import Link from "next/link";
 
 type RepoProps = { gist: Gist };

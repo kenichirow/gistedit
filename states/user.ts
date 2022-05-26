@@ -85,8 +85,8 @@ const useGithubUser = () => {
       return snapshot
         .getPromise(accessTokenQuery)
         .then((token) => {
-          if (token != "") {
-            return fetchGithubUser(token).then((user: GitHubUser) => {
+          if (token !== "") {
+            return fetchGithubUser(token).then((user) => {
               set(githubUserQuery, user);
             });
           }

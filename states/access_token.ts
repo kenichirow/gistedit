@@ -17,7 +17,7 @@ const accessTokenQuery: RecoilState<string> = selector({
   key: "myapp.kenichirow.com:access_token:selector",
   get: async ({ get }) => {
     const token = get(accessTokenState);
-    if (token != "") {
+    if (token !== "") {
       return token;
     }
     if (typeof window !== "undefined") {

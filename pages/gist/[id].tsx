@@ -23,14 +23,12 @@ const GistPage: React.FC = () => {
       }
     })();
 
-    if (gists.state != "hasValue") {
+    if (gists.state !== "hasValue") {
       fetchGists()
         .then(() => {
-          setGist(gistId).then(fetchGistFile);
+          setGist(gistId);
         })
-        .catch(() => {
-          console.log("ER");
-        });
+        .then(fetchGistFile);
     } else {
       setGist(gistId).then(fetchGistFile);
     }

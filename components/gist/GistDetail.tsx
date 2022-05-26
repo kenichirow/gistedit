@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { GistFile, useGist, useGists } from "../../states/gist";
+import { GistFile, useGist } from "../../states/gist";
 import styles from "../../styles/GistDetail.module.css";
 import { GistControl } from "./GistControl";
 import { GistFileContent } from "./GistFile";
@@ -12,11 +12,7 @@ const GistDetail: React.FC<{ gistId: string }> = ({ gistId }) => {
   useEffect(() => {
     if (gistFiles.state === "hasValue" && gistFiles.contents) {
       setLocalGistFiles(gistFiles.contents);
-      console.log("set");
-
       setInit(gist.state === "hasValue" && gist.contents.id === gistId);
-    } else {
-      console.log(gistFiles);
     }
   }, [gist, init, gistFiles, gistId]);
 
@@ -48,10 +44,11 @@ const GistDetail: React.FC<{ gistId: string }> = ({ gistId }) => {
   );
 
   const onGistUpdate = useCallback(() => {
-    updateGist(localGistFiles);
+    setInit(false);
+    updateGist(localGistFiles).then(() => {});
   }, [localGistFiles]);
 
-  if (gist.state == "hasValue" && gistFiles.state == "hasValue") {
+  if (init) {
     return (
       <article className={styles.gistDetail}>
         <GistControl onUpdate={onGistUpdate} onNewGistFile={onNewGistFile} />

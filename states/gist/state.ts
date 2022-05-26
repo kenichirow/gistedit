@@ -1,14 +1,8 @@
-import {
-  atom,
-  atomFamily,
-  selector,
-  selectorFamily,
-  useRecoilCallback,
-} from "recoil";
+import { atom, atomFamily, selector } from "recoil";
 
-import { Gist, GistFile, RawGistFile, RawGistFileURL } from "./type";
+import { Gist, GistFile, RawGistFile } from "./type";
 
-export const currentGistIdState = atom<string>({
+export const currentGistIdAtom = atom<string>({
   key: "myapp.kenichirow.com:gist:current:id",
 });
 
@@ -20,57 +14,31 @@ export const gistsAtom = atom<Gist[]>({
   key: "myapp.kenichirow.com:gists2",
 });
 
-export const currentGistQuery = selector({
+export const currentGistQuery = selector<Gist>({
   key: "myapp.kenichirow.com:gist:current:query3",
   get: async ({ get }) => {
-    const f = get(currentGistIdState);
+    const f = get(currentGistIdAtom);
     return get(gistAtom(f));
   },
 });
 
-export const currentGistState = atom<Gist>({
-  key: "myapp.kenichirow.com:gist:current",
-});
-
 export const gistFileAtom = atomFamily<Gist, string>({
-  key: "myapp.kenichirow.com:gist:file:1",
+  key: "myapp.kenichirow.com:gist:file",
 });
 
-export const gistFileRawAtom = atomFamily<string, string>({
-  key: "myapp.kenichirow.com:gist:file:raw:1",
+export const gistFileRawAtom = atomFamily<RawGistFile, string>({
+  key: "myapp.kenichirow.com:gist:file:raw",
 });
 
-export const currentGistFilesQuery = selector({
+export const currentGistFilesQuery = selector<GistFile[]>({
   key: "myapp.kenichirow.com:gist:current:files:query",
   get: async ({ get }) => {
     const gist = get(currentGistQuery);
-    if (!gist) {
-      return;
-    }
-    const files = Object.entries(gist.files).map(
-      async (value: [string, GistFile]) => {
-        let file = value[1] as GistFile;
-        const raw = await get(rawGisteFile(file.raw_url as string));
-        return { ...file, raw: raw };
-      }
-    );
-    return Promise.all(files);
+    const files = Object.keys(gist.files).map((filename) => {
+      const f = gist.files[filename];
+      const raw = get(gistFileRawAtom(f.filename as string));
+      return { ...f, raw: raw };
+    });
+    return files;
   },
-});
-
-export const rawGisteFile = selectorFamily<RawGistFile, RawGistFileURL>({
-  key: "myapp.kenichirow.com:gists:raw",
-  get:
-    (fileName) =>
-    async ({ get }) => {
-      if (fileName == "") {
-        return "";
-      }
-      const data = await fetch(fileName)
-        .then((res) => res.text())
-        .catch((error) => {
-          return "";
-        });
-      return data;
-    },
 });
