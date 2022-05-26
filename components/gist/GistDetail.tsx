@@ -1,28 +1,31 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { useUsersGists, GistFile } from "../../states/gist";
+import { GistFile, useGist } from "../../states/gist";
 import styles from "../../styles/GistDetail.module.css";
 import { GistControl } from "./GistControl";
 import { GistFileContent } from "./GistFile";
 
-const GistDetail: React.FC = () => {
-  const { gist, gistFiles, updateGist } = useUsersGists();
+const GistDetail: React.FC<{ gistId: string }> = ({ gistId }) => {
+  const { gist, gistFiles, updateGist } = useGist();
   const [localGistFiles, setLocalGistFiles] = useState<GistFile[]>([]);
+  const [init, setInit] = useState(false);
 
   useEffect(() => {
     if (gistFiles.state === "hasValue" && gistFiles.contents) {
       setLocalGistFiles(gistFiles.contents);
+      setInit(gist.state === "hasValue" && gist.contents.id === gistId);
     }
-  }, [gistFiles]);
+  }, [gist, init, gistFiles, gistId]);
 
   const onGistFileChange = useCallback(
     (filename: string, content: string) => {
-      const newFiles = localGistFiles.map((f) => {
-        if (f.filename == filename) {
-          return { ...f, raw: content };
-        }
-        return f;
+      setLocalGistFiles((localGistFiles) => {
+        return localGistFiles.map((f) => {
+          if (f.filename === filename) {
+            return { ...f, raw: content };
+          }
+          return f;
+        });
       });
-      setLocalGistFiles(newFiles);
     },
     [localGistFiles]
   );
@@ -41,10 +44,11 @@ const GistDetail: React.FC = () => {
   );
 
   const onGistUpdate = useCallback(() => {
-    updateGist(localGistFiles);
+    setInit(false);
+    updateGist(localGistFiles).then(() => {});
   }, [localGistFiles]);
 
-  if (gist.state == "hasValue" && gistFiles.state == "hasValue") {
+  if (init) {
     return (
       <article className={styles.gistDetail}>
         <GistControl onUpdate={onGistUpdate} onNewGistFile={onNewGistFile} />
@@ -56,7 +60,7 @@ const GistDetail: React.FC = () => {
       </article>
     );
   } else {
-    return <div></div>;
+    return <div> {"loading..."}</div>;
   }
 };
 
