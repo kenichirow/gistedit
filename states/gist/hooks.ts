@@ -3,6 +3,7 @@ import { accessTokenQuery } from "../access_token";
 import { githubUserQuery } from "../user";
 
 import { Gist, GistFile } from "./type";
+import GistApi from "./api";
 import {
   gistAtom,
   gistsAtom,
@@ -28,12 +29,10 @@ const useGist = () => {
   const updateGist = useRecoilCallback(
     ({ snapshot, set }) =>
       async (updateFiles: GistFile[]) => {
-        console.log("-----------");
-        console.log(updateFiles);
         const gist = snapshot.getLoadable(currentGistQuery).getValue();
         const githubToken = snapshot.getLoadable(accessTokenQuery).getValue();
 
-        return patchGist(githubToken, gist.id, updateFiles)
+        return GistApi.patch(githubToken, gist.id, updateFiles)
           .then(async (res) => {
             if (!res.ok) {
               return Promise.reject();
@@ -42,6 +41,42 @@ const useGist = () => {
           })
           .then((updatedGist) => {
             set(gistAtom(gist.id), updatedGist);
+          });
+      }
+  );
+
+  const createGist = useRecoilCallback(
+    ({ snapshot, set }) =>
+      async (updateFiles: GistFile[]) => {
+        const gist = snapshot.getLoadable(currentGistQuery).getValue();
+        const githubToken = snapshot.getLoadable(accessTokenQuery).getValue();
+
+        return GistApi.new(githubToken, updateFiles)
+          .then(async (res) => {
+            if (!res.ok) {
+              return Promise.reject();
+            }
+            return res.json();
+          })
+          .then((updatedGist) => {
+            set(gistAtom(gist.id), updatedGist);
+          });
+      }
+  );
+  const deleteGist = useRecoilCallback(
+    ({ snapshot, reset }) =>
+      async (gistId: string) => {
+        const githubToken = snapshot.getLoadable(accessTokenQuery).getValue();
+
+        return GistApi.delete(githubToken, gistId)
+          .then(async (res) => {
+            if (!res.ok) {
+              return Promise.reject();
+            }
+            console.log(res.json());
+          })
+          .then(() => {
+            reset(gistAtom(gistId));
           });
       }
   );
@@ -76,6 +111,8 @@ const useGist = () => {
     gistFiles,
     setGist,
     fetchGistFile,
+    createGist,
+    deleteGist,
     updateGist,
   };
 };
@@ -119,45 +156,6 @@ const useGists = () => {
     gists,
     fetchGists,
   };
-};
-
-const patchGist = (
-  githubToken: string,
-  gistId: string,
-  updateFiles: GistFile[]
-) => {
-  const url = `https://api.github.com/gists/${gistId}`;
-
-  console.log(updateFiles);
-
-  const headers = {
-    "Content-type": "application/json",
-    Authorization: `token ${githubToken}`,
-    Accept: "application/vnd.github.v3+json",
-  };
-
-  const body = toPatchGistBody(updateFiles);
-
-  return fetch(url, {
-    method: "PATCH",
-    headers: headers,
-    body: JSON.stringify(body),
-  });
-};
-
-type patchGistBody = {
-  files: { [filename: string]: { content: string } };
-};
-
-const toPatchGistBody = (gistFiles: GistFile[]): patchGistBody => {
-  let body: patchGistBody = { files: {} };
-
-  gistFiles.forEach((f: GistFile) => {
-    if (f.raw != "") {
-      body.files[f.filename] = { content: f.raw || "" };
-    }
-  });
-  return body;
 };
 
 export { useGists, useGist };

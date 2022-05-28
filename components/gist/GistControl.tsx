@@ -3,11 +3,13 @@ import React, { useCallback, useState } from "react";
 export type GistControlProps = {
   onUpdate: () => void;
   onNewGistFile: (filename: string) => void;
+  onDelete: () => void;
 };
 
 const GistControl: React.FC<GistControlProps> = ({
   onUpdate,
   onNewGistFile,
+  onDelete,
 }) => {
   const [newFileName, setNewFileName] = useState("");
   const fileNameChange = useCallback(
@@ -38,6 +40,13 @@ const GistControl: React.FC<GistControlProps> = ({
         }}
       >
         Update
+      </button>
+      <button
+        onClick={() => {
+          onDelete();
+        }}
+      >
+        Delete
       </button>
     </div>
   );

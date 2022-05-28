@@ -5,7 +5,7 @@ import { GistControl } from "./GistControl";
 import { GistFileContent } from "./GistFile";
 
 const GistDetail: React.FC<{ gistId: string }> = ({ gistId }) => {
-  const { gist, gistFiles, updateGist } = useGist();
+  const { gist, gistFiles, updateGist, deleteGist } = useGist();
   const [localGistFiles, setLocalGistFiles] = useState<GistFile[]>([]);
   const [init, setInit] = useState(false);
 
@@ -43,6 +43,12 @@ const GistDetail: React.FC<{ gistId: string }> = ({ gistId }) => {
     [localGistFiles]
   );
 
+  const onDeleteGistFile = useCallback(() => {
+    deleteGist(gist.contents.id).then(() => {
+      console.log("delete!");
+    });
+  }, [gist]);
+
   const onGistUpdate = useCallback(() => {
     setInit(false);
     updateGist(localGistFiles).then(() => {});
@@ -54,7 +60,11 @@ const GistDetail: React.FC<{ gistId: string }> = ({ gistId }) => {
 
   return (
     <article className={styles.gistDetail}>
-      <GistControl onUpdate={onGistUpdate} onNewGistFile={onNewGistFile} />
+      <GistControl
+        onUpdate={onGistUpdate}
+        onNewGistFile={onNewGistFile}
+        onDelete={onDeleteGistFile}
+      />
       {localGistFiles.map((gistFile) => {
         return <GistFileContent file={gistFile} onChange={onGistFileChange} />;
       })}
