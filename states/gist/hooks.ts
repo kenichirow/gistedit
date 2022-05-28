@@ -28,6 +28,8 @@ const useGist = () => {
   const updateGist = useRecoilCallback(
     ({ snapshot, set }) =>
       async (updateFiles: GistFile[]) => {
+        console.log("-----------");
+        console.log(updateFiles);
         const gist = snapshot.getLoadable(currentGistQuery).getValue();
         const githubToken = snapshot.getLoadable(accessTokenQuery).getValue();
 
@@ -125,6 +127,8 @@ const patchGist = (
   updateFiles: GistFile[]
 ) => {
   const url = `https://api.github.com/gists/${gistId}`;
+
+  console.log(updateFiles);
 
   const headers = {
     "Content-type": "application/json",

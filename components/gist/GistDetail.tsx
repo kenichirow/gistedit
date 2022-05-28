@@ -38,7 +38,7 @@ const GistDetail: React.FC<{ gistId: string }> = ({ gistId }) => {
         raw: "",
       };
 
-      setLocalGistFiles(localGistFiles.concat([newGistFile]).reverse());
+      setLocalGistFiles(localGistFiles.concat([newGistFile]));
     },
     [localGistFiles]
   );
@@ -48,20 +48,18 @@ const GistDetail: React.FC<{ gistId: string }> = ({ gistId }) => {
     updateGist(localGistFiles).then(() => {});
   }, [localGistFiles]);
 
-  if (init) {
-    return (
-      <article className={styles.gistDetail}>
-        <GistControl onUpdate={onGistUpdate} onNewGistFile={onNewGistFile} />
-        {localGistFiles.map((gistFile) => {
-          return (
-            <GistFileContent file={gistFile} onChange={onGistFileChange} />
-          );
-        })}
-      </article>
-    );
-  } else {
+  if (!init) {
     return <div> {"loading..."}</div>;
   }
+
+  return (
+    <article className={styles.gistDetail}>
+      <GistControl onUpdate={onGistUpdate} onNewGistFile={onNewGistFile} />
+      {localGistFiles.map((gistFile) => {
+        return <GistFileContent file={gistFile} onChange={onGistFileChange} />;
+      })}
+    </article>
+  );
 };
 
 export { GistDetail };
