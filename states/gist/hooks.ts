@@ -1,4 +1,4 @@
-import { useRecoilCallback, useRecoilValueLoadable } from "recoil";
+import { useRecoilCallback, useRecoilValueLoadable, Loadable } from "recoil";
 import { accessTokenQuery } from "../access_token";
 import { githubUserQuery } from "../user";
 
@@ -63,6 +63,7 @@ const useGist = () => {
           });
       }
   );
+
   const deleteGist = useRecoilCallback(
     ({ snapshot, reset }) =>
       async (gistId: string) => {

@@ -13,7 +13,7 @@ const GistPage: React.FC = () => {
   const gistId = router.query.id as string;
 
   const { login, user } = useGithubUser();
-  const { setGist, gist, fetchGistFile } = useGist();
+  const { setGist, gist, gistFiles, fetchGistFile } = useGist();
   const { gists, fetchGists } = useGists();
 
   useEffect(() => {
@@ -32,7 +32,7 @@ const GistPage: React.FC = () => {
     } else {
       setGist(gistId).then(fetchGistFile);
     }
-  }, [user, setGist, fetchGists, gists, login, gistId, router]);
+  }, [user, setGist, fetchGists, gists, login, gistId, router, gistFiles]);
 
   if (gist.state != "hasValue") {
     return <>{"loading.."}</>;
@@ -43,7 +43,7 @@ const GistPage: React.FC = () => {
       <div className={styles.wrapper}>
         <SideBar />
         <div className={styles.content}>
-          <GistDetail gistId={gistId} />
+          <GistDetail gist={gist.contents} gistFiles={gistFiles} />
         </div>
       </div>
     </>

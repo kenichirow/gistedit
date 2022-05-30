@@ -6,20 +6,16 @@ import { GistFileContent } from "./GistFile";
 import { Loadable } from "recoil";
 import { imageConfigDefault } from "next/dist/shared/lib/image-config";
 
-type GistDetailProps = {
-  gist: Gist;
-  gistFiles: Loadable<GistFile[]>;
+type NewGistPros = {
+  gistFiles: GistFile[];
 };
 
-const GistDetail: React.FC<GistDetailProps> = ({ gist, gistFiles }) => {
+const NewGist: React.FC<NewGistPros> = ({ gistFiles }) => {
   const { updateGist, deleteGist } = useGist();
   const [localGistFiles, setLocalGistFiles] = useState<GistFile[]>([]);
 
   useEffect(() => {
-    console.log(gistFiles);
-    if (gistFiles.state == "hasValue") {
-      setLocalGistFiles(gistFiles.contents);
-    }
+    setLocalGistFiles(gistFiles);
   }, [gistFiles]);
 
   const onGistFileChange = useCallback(
@@ -49,11 +45,7 @@ const GistDetail: React.FC<GistDetailProps> = ({ gist, gistFiles }) => {
     [localGistFiles]
   );
 
-  const onDeleteGistFile = useCallback(() => {
-    deleteGist(gist.id).then(() => {
-      console.log("delete!");
-    });
-  }, [gist]);
+  const onDeleteGistFile = useCallback(() => {}, []);
 
   const onGistUpdate = useCallback(() => {
     updateGist(localGistFiles).then(() => {});
@@ -61,11 +53,7 @@ const GistDetail: React.FC<GistDetailProps> = ({ gist, gistFiles }) => {
 
   return (
     <article className={styles.gistDetail}>
-      <GistControl
-        onUpdate={onGistUpdate}
-        onNewGistFile={onNewGistFile}
-        onDelete={onDeleteGistFile}
-      />
+      <GistControl onUpdate={onGistUpdate} onNewGistFile={onNewGistFile} />
       {localGistFiles.map((gistFile) => {
         return <GistFileContent file={gistFile} onChange={onGistFileChange} />;
       })}
@@ -73,4 +61,4 @@ const GistDetail: React.FC<GistDetailProps> = ({ gist, gistFiles }) => {
   );
 };
 
-export { GistDetail };
+export { NewGist };

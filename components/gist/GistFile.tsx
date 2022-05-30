@@ -15,6 +15,7 @@ const GistFileContent: React.FC<{
   return (
     <div key={file.filename}>
       <h2>{file.filename}</h2>
+      <button>delete</button>
       <p>
         {file.size}
         {"b"}

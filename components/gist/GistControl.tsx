@@ -3,7 +3,7 @@ import React, { useCallback, useState } from "react";
 export type GistControlProps = {
   onUpdate: () => void;
   onNewGistFile: (filename: string) => void;
-  onDelete: () => void;
+  onDelete?: () => void;
 };
 
 const GistControl: React.FC<GistControlProps> = ({
@@ -41,13 +41,15 @@ const GistControl: React.FC<GistControlProps> = ({
       >
         Update
       </button>
-      <button
-        onClick={() => {
-          onDelete();
-        }}
-      >
-        Delete
-      </button>
+      {onDelete && (
+        <button
+          onClick={() => {
+            onDelete();
+          }}
+        >
+          Delete
+        </button>
+      )}
     </div>
   );
 };
